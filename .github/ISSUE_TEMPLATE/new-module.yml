@@ -1,0 +1,48 @@
+name: Propose a module
+description: Propose a new area of mathematics to add to the graph.
+title: "[module] "
+labels: ["module-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Modules are cheap to create and expensive to merge later. Please answer
+        the scope questions properly — the second one matters more than the first.
+  - type: input
+    id: name
+    attributes:
+      label: Proposed module id
+      placeholder: "ordered-fields"
+    validations:
+      required: true
+  - type: textarea
+    id: scope_in
+    attributes:
+      label: What is in scope
+    validations:
+      required: true
+  - type: textarea
+    id: scope_out
+    attributes:
+      label: What is explicitly OUT of scope
+      description: This is what stops the graph becoming one undifferentiated blob.
+    validations:
+      required: true
+  - type: input
+    id: imports
+    attributes:
+      label: Which existing modules would it import
+      placeholder: "group-theory-elementary"
+  - type: textarea
+    id: first_five
+    attributes:
+      label: The first five nodes you intend to write
+      description: Ids, titles, and one line each on what they say.
+    validations:
+      required: true
+  - type: checkboxes
+    id: commitment
+    attributes:
+      label: Maintenance
+      options:
+        - label: I intend to write and maintain these nodes myself, not only propose them.

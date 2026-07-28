@@ -1,0 +1,51 @@
+id: T2
+kind: theorem
+title: Left cancellation
+statement:
+  natural: 'For all a, b, c in G, if a·b = a·c then b = c.'
+  latex: '\forall a, b, c \in G:\; a \cdot b = a \cdot c \implies b = c'
+  context: [A1]
+proof:
+  strategy: >
+    Multiply both sides on the left by an inverse of a, then reassociate so that the
+    inverse meets a and collapses to the identity.
+  hypotheses:
+    - 'h: a, b, c are in G and a·b = a·c'
+  steps:
+    - n: 1
+      claim: "there is an element a' in G with a'·a = e"
+      by: [A4]
+    - n: 2
+      claim: "a'·(a·b) = a'·(a·c)"
+      by: ['hyp:h', L2, A1]
+      note: >
+        L2 substitutes equals into the right factor of a'·(−). L2 quantifies over elements
+        of G, so instantiating it at the products a·b and a·c needs A1.
+    - n: 3
+      claim: "(a'·a)·b = a'·(a·b) and (a'·a)·c = a'·(a·c)"
+      by: [A2]
+    - n: 4
+      claim: "(a'·a)·b = (a'·a)·c"
+      by: [s3, s2, L1]
+    - n: 5
+      claim: "(a'·a)·b = e·b and (a'·a)·c = e·c"
+      by: [s1, L2, A1]
+      note: "L2 substitutes a'·a = e into the left factor; A1 puts the product a'·a in G."
+    - n: 6
+      claim: "e·b = e·c"
+      by: [s5, s4, L1]
+    - n: 7
+      claim: "e·b = b and e·c = c"
+      by: [A3]
+    - n: 8
+      claim: "b = c"
+      by: [s7, s6, L1]
+status: draft
+formalization:
+  metamath: grplcan
+  lean: mul_left_cancel
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted), human review pending'
+tags: [cancellation]

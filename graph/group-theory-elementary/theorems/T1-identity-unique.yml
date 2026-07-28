@@ -1,0 +1,55 @@
+id: T1
+kind: theorem
+title: The identity element is unique
+statement:
+  natural: >
+    If e1 and e2 are both identity elements of G — that is, if e1·a = a·e1 = a for every a
+    in G, and e2·a = a·e2 = a for every a in G — then e1 = e2. In particular the element e
+    fixed by A3 is the only identity, which is what makes the notation `e` legitimate.
+  latex: >-
+    (\forall a \in G:\, e_1 \cdot a = a \cdot e_1 = a) \wedge
+    (\forall a \in G:\, e_2 \cdot a = a \cdot e_2 = a) \implies e_1 = e_2
+  context: [A1, A3]
+proof:
+  strategy: >
+    Evaluate the single product e1·e2 in two ways. Reading it with e1 as the identity gives
+    e2; reading it with e2 as the identity gives e1. The bound variables are named e1 and e2
+    rather than e and f so that neither shadows the module-global identity fixed by A3.
+  hypotheses:
+    - 'e1-ident: e1 is in G and for all a in G, e1·a = a and a·e1 = a'
+    - 'e2-ident: e2 is in G and for all a in G, e2·a = a and a·e2 = a'
+  steps:
+    - n: 1
+      claim: "e1·e2 = e2"
+      by: ['hyp:e1-ident', 'hyp:e2-ident']
+      note: >
+        The left-identity property of e1, instantiated at a := e2. The instantiation needs
+        e2 in G, which is the membership conjunct of e2-ident.
+    - n: 2
+      claim: "e1·e2 = e1"
+      by: ['hyp:e2-ident', 'hyp:e1-ident']
+      note: >
+        The right-identity property of e2, instantiated at a := e1. The instantiation needs
+        e1 in G, which is the membership conjunct of e1-ident.
+    - n: 3
+      claim: "e1 = e1·e2"
+      by: [s2, L1]
+      note: 'Symmetry of equality applied to step 2.'
+    - n: 4
+      claim: "e1 = e2"
+      by: [s3, s1, L1]
+      note: 'Transitivity of equality.'
+status: draft
+formalization:
+  metamath: grpideu
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted); citation defects found in adversarial review, corrected'
+  note: >
+    No single mathlib declaration states this. In mathlib the identity is a field of
+    MulOneClass rather than a proved uniqueness lemma, so the closest artefacts are
+    Monoid.ext and the structure eta rules. Rather than record prose in `formalization`,
+    where a placeholder would satisfy the `verified` check without backing it, lean: is
+    omitted until someone identifies a real declaration.
+tags: [identity, uniqueness]

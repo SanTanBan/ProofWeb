@@ -1,0 +1,66 @@
+id: T6
+kind: theorem
+title: The inverse of a product reverses the order
+statement:
+  natural: "For all a, b in G, (a·b)' = b'·a'."
+  latex: '\forall a, b \in G:\; (a \cdot b)'' = b'' \cdot a'''
+  context: [A1, A3, A4, T4]
+proof:
+  strategy: >
+    Exhibit b'·a' as an inverse of a·b by multiplying out; the inner pair collapses first,
+    then the outer pair. Uniqueness of inverses upgrades "an inverse" to "the inverse".
+  steps:
+    - n: 1
+      claim: "b'·a' is an element of G"
+      by: [A1, A4]
+      note: 'A4 puts b'' and a'' in G; A1 closes the product. Steps 2 and 12 both need this.'
+    - n: 2
+      claim: "(a·b)·(b'·a') = a·(b·(b'·a'))"
+      by: [A2, s1]
+      note: "A2 instantiated at (a, b, b'·a'); the third factor lies in G by step 1."
+    - n: 3
+      claim: "b·(b'·a') = (b·b')·a'"
+      by: [A2, L1]
+      note: "A2 read right to left; the reversal of orientation is symmetry of equality, L1."
+    - n: 4
+      claim: "b·b' = e"
+      by: [A4]
+    - n: 5
+      claim: "(b·b')·a' = e·a'"
+      by: [s4, L2, A1]
+      note: "L2 substitutes b·b' = e into the left factor; A1 puts the product b·b' in G."
+    - n: 6
+      claim: "e·a' = a'"
+      by: [A3]
+    - n: 7
+      claim: "b·(b'·a') = a'"
+      by: [s3, s5, s6, L1]
+    - n: 8
+      claim: "a·(b·(b'·a')) = a·a'"
+      by: [s7, L2, A1]
+      note: "L2 substitutes into the right factor of a·(−); A1 puts b·(b'·a') in G."
+    - n: 9
+      claim: "a·a' = e"
+      by: [A4]
+    - n: 10
+      claim: "(a·b)·(b'·a') = e"
+      by: [s2, s8, s9, L1]
+    - n: 11
+      claim: "(a·b)·(a·b)' = e"
+      by: [A1, A4]
+      note: 'A4 applied to the element a·b, which lies in G by A1.'
+    - n: 12
+      claim: "(a·b)' = b'·a'"
+      by: [s1, s10, s11, T4, L1, A1]
+      note: >
+        T4 with outer element a·b (in G by A1), comparing the candidate inverses (a·b)'
+        and b'·a' (in G by step 1).
+status: draft
+formalization:
+  metamath: grpinvadd
+  lean: mul_inv_rev
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted); citation defects found in adversarial review, corrected'
+tags: [inverse, product]

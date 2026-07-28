@@ -1,0 +1,50 @@
+id: group-theory-elementary
+title: Elementary group theory
+description: >
+  The pilot module. A deliberately small, fully self-contained subset: four group
+  axioms, two background principles about equality, and eight theorems whose proofs
+  cite nothing outside this module. Every proof here is standard and appears in any
+  first algebra course, which is exactly the point — the mathematics must be beyond
+  dispute so that what is being tested is the METHOD, not the content.
+
+scope: >
+  A single group (G, ·). No subgroups, no homomorphisms, no order, no finiteness.
+  Anything requiring those belongs in a later module that imports this one.
+
+conventions:
+  - id: naming-the-identity
+    text: >
+      A3 asserts that an identity EXISTS. Throughout this module the symbol `e` names
+      one such element, fixed once. A4 and every later statement mentioning `e` refer to
+      that fixed choice. T1 then proves the choice was forced, which is what makes the
+      notation retroactively legitimate. This ordering is deliberate and is the usual
+      textbook treatment; a fully formal development would either carry the choice
+      explicitly or state A4 with an existential over identities.
+  - id: naming-the-inverse
+    text: >
+      Similarly, A4 asserts that for each `a` an inverse EXISTS. The notation `a'` names
+      one such element, and T4 proves the choice was forced. No step before T4 may assume
+      `a'` is unique.
+  - id: closure-citations
+    text: >
+      A1 (closure) is what makes every product term denote an element of G. The rule in
+      this module is mechanical: **a step cites A1 exactly when it instantiates a
+      quantified statement at a term that is itself a product**, because every axiom and
+      theorem here quantifies over elements of G and the instantiation is only licensed
+      once the product is known to lie in G. If an earlier step already established that
+      particular membership, cite that step instead of A1.
+      An earlier draft used a laxer rule — cite A1 only where a step's *content* is a
+      membership claim — which an adversarial review correctly rejected: which steps have
+      membership as their content is the author's choice of what to write down, so the rule
+      was not a predicate on the mathematics and could not be audited. Under it, closure was
+      load-bearing but uncited at seven steps while A1's only two edges came from optional
+      bookkeeping lines. See docs/SPEC.md#the-closure-convention.
+      This rule is enforced by human review, not by the validator; no program can tell
+      which terms in a natural-language claim are products.
+
+imports: []
+
+meta:
+  language: informal-rigorous
+  status: pilot
+  license: CC-BY-4.0

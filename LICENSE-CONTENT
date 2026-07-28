@@ -1,0 +1,33 @@
+Graph content and documentation
+===============================
+
+Everything under graph/ and docs/ is licensed under the
+
+    Creative Commons Attribution 4.0 International License (CC BY 4.0)
+    https://creativecommons.org/licenses/by/4.0/
+    Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+You are free to share and adapt this material for any purpose, including
+commercially, provided you give appropriate credit, link to the licence, and
+indicate whether changes were made.
+
+Suggested attribution
+---------------------
+
+    ProofGraph contributors, "ProofGraph", <repository URL>, <year>.
+    Licensed under CC BY 4.0.
+
+If you use a specific node, cite its id and the commit hash. Node ids are stable;
+proofs are not guaranteed to be.
+
+A note on the mathematics
+-------------------------
+
+The theorems in this repository are, by design, standard results that have been
+public for a century or more. Nobody owns the fact that inverses in a group are
+unique. What is licensed here is the particular expression: the wording of the
+statements, the decomposition into steps, the citation structure, and the prose.
+
+Where a proof is adapted from an identifiable source, that source is recorded in
+the node's `provenance.source` field. Contributors must not copy proof text from
+sources whose licence does not permit it; see CONTRIBUTING.md.

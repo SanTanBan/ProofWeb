@@ -1,0 +1,16 @@
+id: A3
+kind: axiom
+title: Existence of an identity element
+statement:
+  natural: >
+    There exists an element e in G such that for every a in G, e·a = a and a·e = a.
+    Throughout this module `e` names one such fixed element (see the naming-the-identity
+    convention in manifest.yml); T1 proves the choice was forced.
+  latex: '\exists e \in G\; \forall a \in G:\; e \cdot a = a \;\wedge\; a \cdot e = a'
+  context: [A1]
+formalization:
+  metamath: 'grpidcl, grplid, grprid'
+  lean: 'one_mul, mul_one'
+provenance:
+  source: 'Standard group axiom.'
+tags: [group-axiom, identity]

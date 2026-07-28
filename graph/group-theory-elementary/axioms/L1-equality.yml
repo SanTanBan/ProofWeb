@@ -1,0 +1,14 @@
+id: L1
+kind: background
+title: Equality is an equivalence relation
+statement:
+  natural: >
+    For all x, y, z: x = x (reflexivity); if x = y then y = x (symmetry); and if
+    x = y and y = z then x = z (transitivity).
+  latex: 'x = x;\quad x = y \implies y = x;\quad (x = y \wedge y = z) \implies x = z'
+formalization:
+  metamath: 'eqid, eqcom, eqtr'
+  lean: 'Eq.refl, Eq.symm, Eq.trans'
+provenance:
+  source: 'First-order logic with equality; assumed by the ambient logic, not by group theory.'
+tags: [logic, equality]

@@ -1,0 +1,44 @@
+name: Error in a node
+description: A step is unjustified, a citation is wrong, or a statement is false.
+title: "[node] "
+labels: ["correctness"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable kind of issue in the repository. Thank you.
+  - type: input
+    id: node
+    attributes:
+      label: Node id
+      placeholder: "T6"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong
+      options:
+        - A step does not follow from its citations
+        - A step uses something it does not cite (missing dependency)
+        - A step cites something it does not use (spurious dependency)
+        - The statement is false or ambiguous
+        - The formalization link points at the wrong declaration
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: step
+    attributes:
+      label: Which step
+      placeholder: "step 7 (leave blank if it is about the statement)"
+  - type: textarea
+    id: detail
+    attributes:
+      label: What exactly is wrong
+      description: >
+        Be as specific as you can. If a step is missing a dependency, name the
+        result it silently uses. If you are unsure, say so — a well-described
+        suspicion is still useful.
+    validations:
+      required: true

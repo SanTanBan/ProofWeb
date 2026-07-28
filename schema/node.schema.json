@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/proofgraph/schema/node.schema.json",
+  "title": "ProofGraph node",
+  "description": "One axiom, definition, or theorem, together with a proof whose every step carries its own justification. Graph edges are DERIVED from step justifications, never declared by hand.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "title", "statement"],
+
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique within the module. Convention: A* axiom, D* definition, L* background/logical, T* theorem.",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.-]*$"
+    },
+
+    "kind": {
+      "enum": ["axiom", "definition", "background", "theorem"],
+      "description": "axiom: assumed, no proof. definition: introduces vocabulary, no proof. background: logical/meta principle assumed by the ambient logic (equality, substitution). theorem: must carry a proof."
+    },
+
+    "title": { "type": "string", "minLength": 1 },
+
+    "statement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["natural"],
+      "properties": {
+        "natural": {
+          "type": "string",
+          "description": "Precise natural-language statement. Must be unambiguous enough that two mathematicians would formalise it the same way."
+        },
+        "latex": { "type": "string" },
+        "context": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Nodes whose VOCABULARY this statement uses. Distinct from proof dependencies: T4 'inverses are unique' cannot even be stated without A3 (identity) and A4 (inverse), yet its proof may not cite them. These produce 'vocabulary' edges."
+        }
+      }
+    },
+
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "strategy": { "type": "string", "description": "One or two sentences of human orientation before the formal steps." },
+        "hypotheses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Named assumptions discharged by the statement's implication, referable in steps as 'hyp' or 'hyp:name'."
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["n", "claim", "by"],
+            "properties": {
+              "n": { "type": "integer", "minimum": 1, "description": "Step number, 1-based and contiguous." },
+              "claim": { "type": "string", "minLength": 1, "description": "What this step asserts." },
+              "by": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string" },
+                "description": "Justifications. Each entry is either (a) the id of another node -> becomes a graph edge tagged with this step number, or (b) a LOCAL token that creates no edge: 'hyp', 'hyp:<name>', 's<k>' (an earlier step of this same proof), or 'assumption' inside a subproof."
+              },
+              "note": { "type": "string", "description": "Optional commentary; never load-bearing." }
+            }
+          }
+        }
+      }
+    },
+
+    "status": {
+      "enum": ["draft", "reviewed", "verified"],
+      "default": "draft",
+      "description": "draft: contributed, unreviewed. reviewed: two independent human reviewers signed off. verified: a machine proof exists and is linked in `formalization`."
+    },
+
+    "formalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cross-references into real proof assistants. This is what keeps the project honest: a node claiming 'verified' must point at something a machine checked.",
+      "properties": {
+        "metamath": { "type": "string", "description": "set.mm label, e.g. 'grpid'" },
+        "lean": { "type": "string", "description": "mathlib4 declaration name, e.g. 'mul_left_cancel'" },
+        "isabelle": { "type": "string" },
+        "rocq": { "type": "string" },
+        "mizar": { "type": "string" }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contributed_by": { "type": "string" },
+        "reviewed_by": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string", "description": "Where the proof comes from: a textbook, a paper, or 'original'." },
+        "assisted_by": { "type": "string", "description": "If an LLM drafted any part of this node, name the model. Required by CONTRIBUTING.md." },
+        "note": {
+          "type": "string",
+          "description": "Free prose about the node's status. Exists so that explanations never get smuggled into `formalization`, whose values must stay real declaration names — a prose placeholder there would satisfy the `verified` check without backing it."
+        }
+      }
+    },
+
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "theorem" } }, "required": ["kind"] },
+      "then": { "required": ["proof"] }
+    },
+    {
+      "if": { "properties": { "kind": { "enum": ["axiom", "background", "definition"] } }, "required": ["kind"] },
+      "then": { "not": { "required": ["proof"] } }
+    }
+  ]
+}

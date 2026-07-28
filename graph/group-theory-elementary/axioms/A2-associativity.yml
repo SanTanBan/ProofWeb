@@ -1,0 +1,13 @@
+id: A2
+kind: axiom
+title: Associativity
+statement:
+  natural: 'For all a, b, c in G, (a·b)·c = a·(b·c).'
+  latex: '\forall a, b, c \in G:\; (a \cdot b) \cdot c = a \cdot (b \cdot c)'
+  context: [A1]
+formalization:
+  metamath: grpass
+  lean: mul_assoc
+provenance:
+  source: 'Standard group axiom.'
+tags: [group-axiom]

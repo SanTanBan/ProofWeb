@@ -1,0 +1,53 @@
+id: T3
+kind: theorem
+title: Right cancellation
+statement:
+  natural: 'For all a, b, c in G, if b·a = c·a then b = c.'
+  latex: '\forall a, b, c \in G:\; b \cdot a = c \cdot a \implies b = c'
+  context: [A1]
+proof:
+  strategy: >
+    The mirror image of T2: multiply on the right by an inverse of a instead of the left.
+    It is not a corollary of T2 because · is not assumed commutative, so a·b = a·c and
+    b·a = c·a are independent hypotheses. The mirror argument goes through because A3 and
+    A4 are both two-sided.
+  hypotheses:
+    - 'h: a, b, c are in G and b·a = c·a'
+  steps:
+    - n: 1
+      claim: "there is an element a' in G with a·a' = e"
+      by: [A4]
+    - n: 2
+      claim: "(b·a)·a' = (c·a)·a'"
+      by: ['hyp:h', L2, A1]
+      note: >
+        L2 substitutes equals into the left factor of (−)·a'. Instantiating L2 at the
+        products b·a and c·a needs A1.
+    - n: 3
+      claim: "(b·a)·a' = b·(a·a') and (c·a)·a' = c·(a·a')"
+      by: [A2]
+    - n: 4
+      claim: "b·(a·a') = c·(a·a')"
+      by: [s3, s2, L1]
+    - n: 5
+      claim: "b·(a·a') = b·e and c·(a·a') = c·e"
+      by: [s1, L2, A1]
+      note: "L2 substitutes a·a' = e into the right factor; A1 puts the product a·a' in G."
+    - n: 6
+      claim: "b·e = c·e"
+      by: [s5, s4, L1]
+    - n: 7
+      claim: "b·e = b and c·e = c"
+      by: [A3]
+    - n: 8
+      claim: "b = c"
+      by: [s7, s6, L1]
+status: draft
+formalization:
+  metamath: grprcan
+  lean: mul_right_cancel
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted), human review pending'
+tags: [cancellation]

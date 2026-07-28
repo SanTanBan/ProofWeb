@@ -1,0 +1,12 @@
+id: A1
+kind: axiom
+title: Closure
+statement:
+  natural: 'G is a set equipped with a binary operation ·, and for all a, b in G the product a·b is again an element of G.'
+  latex: '\forall a, b \in G:\; a \cdot b \in G'
+formalization:
+  metamath: grpcl
+  lean: Mul.mul
+provenance:
+  source: 'Standard group axiom.'
+tags: [group-axiom]

@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build output
+/build/
+/dist/
+/site/build/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Working notes (keep the repo clean; use docs/ for anything shareable)
+/scratch/
+*.local.md
+
+# PRIVATE — this repository is intended to be public.
+# Grant applications, fellowship drafts and personal planning notes live beside
+# the project on disk but must never be published. Anything added here should be
+# assumed to contain unpublished plans, personal details, or third-party material
+# shared in confidence. Remove an entry only after reading the file in full.
+/Applications/
+/Developing Theorem-Proof--Graphical-Interconnection.docx
+*.private.*

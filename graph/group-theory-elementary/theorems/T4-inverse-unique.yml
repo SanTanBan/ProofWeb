@@ -1,0 +1,35 @@
+id: T4
+kind: theorem
+title: Inverses are unique
+statement:
+  natural: >
+    Let a be in G. If b and c in G both satisfy a·b = e and a·c = e, then b = c. Hence the
+    element a' promised by A4 is uniquely determined by a, and the notation a' is
+    unambiguous.
+  latex: '\forall a, b, c \in G:\; (a \cdot b = e \wedge a \cdot c = e) \implies b = c'
+  context: [A1, A3, A4]
+proof:
+  strategy: >
+    Both products equal e, so they equal each other; cancel a on the left. T4's own
+    hypotheses use only the right-hand equations a·b = e and a·c = e — though T2, which
+    step 2 invokes, does use the two-sided forms of A3 and A4, so two-sidedness is present
+    in T4's dependency closure even though it is absent from its statement.
+  hypotheses:
+    - 'h: a, b, c are in G, a·b = e, and a·c = e'
+  steps:
+    - n: 1
+      claim: "a·b = a·c"
+      by: ['hyp:h', L1]
+      note: 'Both sides equal e; apply symmetry then transitivity.'
+    - n: 2
+      claim: "b = c"
+      by: [s1, T2]
+status: draft
+formalization:
+  metamath: grpinveu
+  lean: inv_eq_of_mul_eq_one_right
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted), human review pending'
+tags: [inverse, uniqueness]

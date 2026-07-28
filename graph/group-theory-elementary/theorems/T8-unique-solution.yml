@@ -1,0 +1,59 @@
+id: T8
+kind: theorem
+title: Linear equations have unique solutions
+statement:
+  natural: >
+    For all a, b in G, the equation a·x = b has exactly one solution x in G, and that
+    solution is a'·b.
+  latex: '\forall a, b \in G:\; \exists! x \in G\,(a \cdot x = b) \;\wedge\; a \cdot (a'' \cdot b) = b'
+  context: [A1, A3, A4, T4]
+proof:
+  strategy: >
+    Two halves. Existence: substitute the candidate and reassociate. Uniqueness: any two
+    solutions have equal images under a, so left cancellation identifies them.
+  hypotheses:
+    - 'two-sols: x and y are in G and a·x = b and a·y = b'
+  steps:
+    - n: 1
+      claim: "a'·b is an element of G"
+      by: [A1, A4]
+      note: "A4 puts a' in G; A1 closes the product a'·b. Step 9 needs this."
+    - n: 2
+      claim: "a·(a'·b) = (a·a')·b"
+      by: [A2, L1]
+      note: "A2 states (a·a')·b = a·(a'·b); the reversal of orientation is symmetry, L1."
+    - n: 3
+      claim: "a·a' = e"
+      by: [A4]
+    - n: 4
+      claim: "(a·a')·b = e·b"
+      by: [s3, L2, A1]
+      note: "L2 substitutes a·a' = e into the left factor; A1 puts the product a·a' in G."
+    - n: 5
+      claim: "e·b = b"
+      by: [A3]
+    - n: 6
+      claim: "a·(a'·b) = b, so a solution exists"
+      by: [s2, s4, s5, L1]
+    - n: 7
+      claim: "a·x = a·y"
+      by: ['hyp:two-sols', L1]
+      note: 'Both sides equal b; symmetry then transitivity.'
+    - n: 8
+      claim: "x = y, so any two solutions coincide"
+      by: [s7, T2]
+    - n: 9
+      claim: "the unique solution is a'·b"
+      by: [s1, s6, s8]
+status: draft
+formalization:
+  metamath: grpdiveu
+provenance:
+  source: 'Standard; any first course in algebra.'
+  contributed_by: 'ProofGraph pilot'
+  assisted_by: 'Claude (drafted); citation defects found in adversarial review, corrected'
+  note: >
+    No single mathlib declaration states this. The existence half is mul_inv_cancel_left
+    and the uniqueness half follows from mul_left_cancel; recording prose in the
+    formalization field would defeat the point of that field, so lean: is omitted.
+tags: [equation, uniqueness]

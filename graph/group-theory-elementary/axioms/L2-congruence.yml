@@ -1,0 +1,19 @@
+id: L2
+kind: background
+title: The operation respects equality (substitution)
+statement:
+  natural: >
+    For all x, y, z in G: if x = y then x·z = y·z and z·x = z·y. Equivalently, equals
+    may be substituted for equals inside a product.
+  latex: 'x = y \implies (x \cdot z = y \cdot z \;\wedge\; z \cdot x = z \cdot y)'
+  context: [A1]
+formalization:
+  metamath: 'oveq1, oveq2'
+  lean: 'congrArg, congrFun'
+provenance:
+  source: >
+    A congruence axiom for the binary operation. In a set-theoretic development this is
+    automatic because · is a function; it is listed explicitly because nearly every proof
+    below silently uses it, and a graph that hides its most-used edge is not telling the
+    truth about the proofs.
+tags: [logic, equality, congruence]

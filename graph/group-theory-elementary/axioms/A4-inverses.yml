@@ -1,0 +1,17 @@
+id: A4
+kind: axiom
+title: Existence of inverses
+statement:
+  natural: >
+    For every a in G there exists an element of G, written a', such that a·a' = e and
+    a'·a = e, where e is the identity fixed by A3. The notation a' names one such element
+    (see the naming-the-inverse convention in manifest.yml); T4 proves the choice was
+    forced, so no step before T4 may treat a' as unique.
+  latex: '\forall a \in G\; \exists a'' \in G:\; a \cdot a'' = e \;\wedge\; a'' \cdot a = e'
+  context: [A1, A3]
+formalization:
+  metamath: 'grpinvcl, grplinv, grprinv'
+  lean: 'inv_mul_cancel, mul_inv_cancel'
+provenance:
+  source: 'Standard group axiom.'
+tags: [group-axiom, inverse]
