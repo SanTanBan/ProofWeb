@@ -15,36 +15,45 @@ proof:
     - 'two-sols: x and y are in G and a·x = b and a·y = b'
   steps:
     - n: 1
+      id: candidate-in-g
       claim: "a'·b is an element of G"
       by: [A1, A4]
-      note: "A4 puts a' in G; A1 closes the product a'·b. Step 9 needs this."
+      note: "A4 puts a' in G; A1 closes the product a'·b. #conclude needs this."
     - n: 2
+      id: reassociate
       claim: "a·(a'·b) = (a·a')·b"
       by: [A2, L1]
       note: "A2 states (a·a')·b = a·(a'·b); the reversal of orientation is symmetry, L1."
     - n: 3
+      id: right-inverse
       claim: "a·a' = e"
       by: [A4]
     - n: 4
+      id: collapse-inverse
       claim: "(a·a')·b = e·b"
-      by: [s3, L2, A1]
+      by: [s:right-inverse, L2, A1]
       note: "L2 substitutes a·a' = e into the left factor; A1 puts the product a·a' in G."
     - n: 5
+      id: drop-identity
       claim: "e·b = b"
       by: [A3]
     - n: 6
+      id: existence
       claim: "a·(a'·b) = b, so a solution exists"
-      by: [s2, s4, s5, L1]
+      by: [s:reassociate, s:collapse-inverse, s:drop-identity, L1]
     - n: 7
+      id: equate-images
       claim: "a·x = a·y"
       by: ['hyp:two-sols', L1]
       note: 'Both sides equal b; symmetry then transitivity.'
     - n: 8
+      id: cancel
       claim: "x = y, so any two solutions coincide"
-      by: [s7, T2]
+      by: [s:equate-images, T2]
     - n: 9
+      id: conclude
       claim: "the unique solution is a'·b"
-      by: [s1, s6, s8]
+      by: [s:candidate-in-g, s:existence, s:cancel]
 status: draft
 formalization:
   metamath: grpdiveu

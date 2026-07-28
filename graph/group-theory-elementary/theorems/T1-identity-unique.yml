@@ -20,24 +20,28 @@ proof:
     - 'e2-ident: e2 is in G and for all a in G, e2·a = a and a·e2 = a'
   steps:
     - n: 1
+      id: left-identity-of-e1
       claim: "e1·e2 = e2"
       by: ['hyp:e1-ident', 'hyp:e2-ident']
       note: >
         The left-identity property of e1, instantiated at a := e2. The instantiation needs
         e2 in G, which is the membership conjunct of e2-ident.
     - n: 2
+      id: right-identity-of-e2
       claim: "e1·e2 = e1"
       by: ['hyp:e2-ident', 'hyp:e1-ident']
       note: >
         The right-identity property of e2, instantiated at a := e1. The instantiation needs
         e1 in G, which is the membership conjunct of e1-ident.
     - n: 3
+      id: flip
       claim: "e1 = e1·e2"
-      by: [s2, L1]
-      note: 'Symmetry of equality applied to step 2.'
+      by: [s:right-identity-of-e2, L1]
+      note: 'Symmetry of equality applied to #right-identity-of-e2.'
     - n: 4
+      id: conclude
       claim: "e1 = e2"
-      by: [s3, s1, L1]
+      by: [s:flip, s:left-identity-of-e1, L1]
       note: 'Transitivity of equality.'
 status: draft
 formalization:

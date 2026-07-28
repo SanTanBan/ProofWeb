@@ -139,7 +139,8 @@ def explain(graph: Graph, node_id: str) -> str:
             for token in step.by:
                 target = graph.get(token)
                 cites.append(f"{token} ({target.title})" if target else token)
-            out.append(f"    {step.n:>3}. {step.claim}")
+            addr = f"  [{node.id}#{step.sid}]" if step.sid else ""
+            out.append(f"    {step.n:>3}. {step.claim}{addr}")
             out.append(f"         by {', '.join(cites)}")
             if step.note:
                 out.append(f"         note: {step.note}")
@@ -151,8 +152,13 @@ def explain(graph: Graph, node_id: str) -> str:
         for dep in deps:
             target = graph.get(dep)
             direct = [e for e in node.edges() if e.dst == dep and e.kind == "proof"]
-            where = (" — used directly at step "
-                     + ", ".join(str(e.step) for e in direct)) if direct else " — indirectly"
+            if direct:
+                # Stable addresses, because these are what anything outside the
+                # proof should cite. Ordinals are shown only as a reading aid.
+                where = " — used at " + ", ".join(
+                    (f"#{e.step_id}" if e.step_id else f"step {e.step}") for e in direct)
+            else:
+                where = " — indirectly"
             out.append(f"    {dep:<6} {target.title if target else '?'}{where}")
 
     users = sorted(graph.descendants(node_id, ("proof",)))
@@ -183,9 +189,16 @@ def summarise(graph: Graph) -> str:
     if theorems:
         out.append(f"citations/step   {len(proof_edges) / max(steps, 1):.2f}")
     verified = sum(1 for n in graph if n.status == "verified")
+    reviewed = sum(1 for n in graph if n.status in ("reviewed", "verified"))
     linked = sum(1 for n in graph if n.formalization)
-    out.append(f"formalized       {linked}/{len(graph)} nodes link to a proof assistant "
-               f"({verified} verified)")
+    out.append(f"formalized       {linked}/{len(graph)} nodes link to a proof assistant")
+
+    # Printed unconditionally, and deliberately hard to look away from: the
+    # project's first kill criterion is that this number is still zero in six
+    # months. A statistic you have to go looking for is a statistic nobody reads.
+    out.append(f"reviewed         {reviewed}/{len(graph)}   verified  {verified}/{len(graph)}")
+    if reviewed == 0:
+        out.append("                 ^ nothing here has been checked by a second person yet")
 
     layers = graph.layers(("proof",))
     out.append("")

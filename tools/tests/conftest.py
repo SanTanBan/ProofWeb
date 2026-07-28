@@ -50,6 +50,12 @@ def axiom(title: str = "An axiom") -> dict:
 
 
 def theorem(title: str, steps: list[dict], **kw) -> dict:
+    """A theorem node. Steps get a stable id unless the test supplies one.
+
+    ``id`` is required by the schema, and a test that had to spell it out every
+    time would be testing the schema rather than whatever it means to test.
+    """
+    steps = [{"id": f"s{s['n']}", **s} for s in steps]
     node = {
         "kind": "theorem",
         "title": title,

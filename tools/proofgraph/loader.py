@@ -44,6 +44,7 @@ def _node_from_dict(data: dict, module: str, path: Path) -> Node:
             claim=str(s["claim"]),
             by=tuple(str(b) for b in s.get("by", ())),
             note=s.get("note"),
+            sid=s.get("id"),
         )
         for s in proof.get("steps", ())
     )

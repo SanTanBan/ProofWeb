@@ -149,6 +149,53 @@ def check_step_back_references(graph: Graph, report: Report) -> None:
                                node.source_path)
 
 
+def check_step_identity(graph: Graph, report: Report) -> None:
+    """Stable step ids must be unique, and citations should use them.
+
+    Ordinals renumber the moment a step is inserted. If ``s3`` is used as a
+    justification and a step is later added at position 2, the citation silently
+    changes meaning — it still resolves, still validates, and now points at the
+    wrong line. That is the worst class of defect this project can have, because
+    nothing surfaces it. Stable ids exist to make it impossible.
+    """
+    for node in graph:
+        if not node.steps:
+            continue
+
+        seen: dict[str, int] = {}
+        for step in node.steps:
+            if step.sid is None:
+                continue
+            if step.sid in seen:
+                report.add("error", "step.duplicate-id", node.id,
+                           f"step {step.n} reuses the id '{step.sid}', already used by "
+                           f"step {seen[step.sid]}; ids must be unique and are never reused",
+                           node.source_path)
+            seen[step.sid] = step.n
+
+        by_id = {s.sid: s for s in node.steps if s.sid}
+        for step in node.steps:
+            for ref in step.step_id_refs():
+                target = by_id.get(ref)
+                if target is None:
+                    report.add("error", "step.missing-id", node.id,
+                               f"step {step.n} cites 's:{ref}', which is not a step of "
+                               f"this proof",
+                               node.source_path)
+                elif target.n >= step.n:
+                    report.add("error", "step.forward-reference", node.id,
+                               f"step {step.n} cites 's:{ref}' (step {target.n}); a step "
+                               f"may only cite steps before it",
+                               node.source_path)
+
+            # Ordinal citations are fragile wherever stable ids are available.
+            if step.step_refs() and any(s.sid for s in node.steps):
+                report.add("warning", "step.ordinal-citation", node.id,
+                           f"step {step.n} cites an earlier step by ordinal (s<n>); use "
+                           f"'s:<id>' so the citation survives a step being inserted",
+                           node.source_path)
+
+
 def check_hypotheses(graph: Graph, report: Report) -> None:
     """Cited hypotheses must be declared, and declared hypotheses should be used."""
     for node in graph:
@@ -283,6 +330,7 @@ CHECKS = (
     check_references_resolve,
     check_step_numbering,
     check_step_back_references,
+    check_step_identity,
     check_hypotheses,
     check_kind_obligations,
     check_acyclic,

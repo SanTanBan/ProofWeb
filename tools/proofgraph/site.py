@@ -45,12 +45,14 @@ def _payload(graph: Graph) -> dict:
             "formalization": n.formalization,
             "source": n.source_path,
             "steps": [
-                {"n": s.n, "claim": s.claim, "by": list(s.by), "note": s.note or ""}
+                {"n": s.n, "id": s.sid or "", "claim": s.claim,
+                 "by": list(s.by), "note": s.note or ""}
                 for s in n.steps
             ],
         })
     edges = [
-        {"src": e.src, "dst": e.dst, "kind": e.kind, "step": e.step}
+        {"src": e.src, "dst": e.dst, "kind": e.kind, "step": e.step,
+         "step_id": e.step_id}
         for e in graph.edges()
     ]
     return {"nodes": nodes, "edges": edges}
@@ -103,6 +105,8 @@ border:1px solid var(--line);cursor:pointer;font-family:ui-monospace,monospace;f
 .cite.node{color:var(--accent);border-color:currentColor}
 .cite.local{color:var(--muted)}
 .note{font-size:12px;color:var(--muted);margin-top:5px}
+.addr{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--muted);
+margin-top:4px;opacity:.75}
 .meta{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);
 font-size:12px;color:var(--muted)}
 .meta code{font-family:ui-monospace,monospace;font-size:11.5px}
@@ -219,6 +223,7 @@ function renderPanel(n) {
   const steps = n.steps.map(s => `
     <li data-step="${s.n}" class="${s.n === activeStep ? "active" : ""}">
       <span class="stepno">${s.n}.</span>${esc(s.claim)}
+      ${s.id ? `<div class="addr" title="the stable address of this step — cite this, not the number">${n.id}#${esc(s.id)}</div>` : ""}
       <div class="by">by ${s.by.map(cite).join("")}</div>
       ${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}
     </li>`).join("");

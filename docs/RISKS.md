@@ -1,60 +1,68 @@
 # Why this project will probably fail
 
 This document is kept in the repository on purpose. A project asking strangers
-for unpaid work owes them an honest account of the odds, and a founder who
-cannot write down the failure modes has not understood the problem.
+for unpaid work owes them an honest account of the odds, and a founder who cannot
+write down the failure modes has not understood the problem.
 
-Nothing here is hypothetical hand-wringing. Several of these failures have
-**already happened at small scale in this repository**, and where they have, the
-evidence is cited.
+It is the output of a deliberate adversarial review commissioned against this
+repository from four independent directions — formal methods, open-source
+ecosystem, AI economics, and product scope. Several of the findings below are
+about defects that were **found in this repository and have since been fixed**;
+those are cited as evidence rather than as reassurance, because the rate at which
+they appeared is itself the argument.
+
+Ranked by severity × probability × how early it bites.
 
 ---
 
-## 1. The graph already exists, and the incumbents are enormous
+## 1. There is no correctness criterion for an edge — not merely no oracle
 
-**Severity: fatal. Probability: near-certain — this is already true.**
+**Severity: fatal. Probability: certain — this is structural.**
 
-[PRIOR-ART.md](PRIOR-ART.md) documents it. Metamath has published an
-axiom→theorem→proof graph with reverse edges and full axiom traceability since
-the 1990s. The Stacks Project does it for human-written LaTeX at 21,446 tags with
-precomputed transitive closure in both directions. LeanDojo has extracted
-step-level premise attribution from all of mathlib since 2023 — 259,580 tactics,
-167,779 premise references. mathlib4 has 283,487 theorems and 772 contributors.
+Every claim the project makes rests on the edges being right, and nothing in the
+design can establish that, even in principle.
 
-A newcomer's instinct is "but none of them does *exactly* this." That instinct is
-how projects die: the residual is real but small, and small residuals do not
-attract the contributors needed to close them.
+`validate.py` concedes in its own docstring that it does not check whether a step
+follows from its justifications. And `Node.edges()` is a list comprehension over
+the hand-typed `by:` field. So **"derived, not declared" is, strictly, a
+relabelling**: the dependency list is still typed by a human, merely sharded
+about eight times finer (63 citations across 50 steps rather than 8 per-theorem
+lists). The derivation is real in that you cannot write an edge without writing a
+justification — but it does not make the edge *true*.
 
-**Mitigation:** none available for the general claim. The only response is to
-stop making it — which is why the README leads with prior art instead of burying
-it. What remains defensible is narrow, and section 11 argues even that is hard.
+Worse, "the right answer" is not well defined. There is no fact of the matter
+about whether a given informal step "uses" transitivity of equality, only a
+convention, and conventions are section 5.
 
-## 2. A hand-authored graph is a lossy duplicate of something a compiler computes exactly
+**Mitigation:** none that preserves the current scope. The two honest moves are
+(a) reposition the artefact as a *measurement of human provenance judgement*,
+where inter-annotator agreement is at least a well-defined quantity, or (b)
+derive edges from Lean elaboration — at which point LeanDojo already did it. See
+the scope recommendation at the end.
 
-**Severity: fatal. Probability: near-certain.**
+## 2. The artefact already exists, built mechanically, at 100–1000× the reachable scale
 
-In Lean and Rocq, the proof term *is* the dependency structure. Every `const`
-subterm names a lemma at a specific structural position. `#print axioms` and
-`Print Assumptions` already walk it. The information is **unexposed and
-unindexed, not undiscovered** — anyone claiming to recover hidden structure is
-overselling.
+**Severity: fatal. Probability: certain — already true.**
 
-So a hand-written YAML graph is a second copy of a fact the kernel already knows,
-produced by a less reliable process, which drifts the moment either side is
-edited. Asked "why should I trust your edge over the compiler's?", the honest
-answer is: you should not.
+[PRIOR-ART.md](PRIOR-ART.md) has the full account. The sharpest instance:
+**TheoremGraph** (arXiv:2606.25363, June 2026) shipped 388,105 Lean declaration
+nodes with 11.3M typed edges across 25 projects, joined against 11.7M arXiv
+theorem environments, with a public front-end, an HTTP API **and an MCP
+interface** — meaning a frontier model can already call the informal dependency
+graph as a tool. LeanDojo supplies 122,517 theorems and 259,580 tactics with
+step-level premise annotations. Metamath has done this since the 1990s.
 
-**Mitigation, partial and real:** the only defensible territory is mathematics
-that has *no* proof term — informal proofs not yet formalized. That is a genuine
-gap (Stacks and `leanblueprint` stop at *statement* granularity), but it is much
-smaller than "a knowledge graph of mathematics", and it inherits every problem
-below.
+**Mitigation — and this one is concrete and cheap:** run the ablation and publish
+it whichever way it comes out. Frontier model + web search, versus frontier model
++ ProofGraph, on step-level attribution for 30 blind steps, judged by a third
+party. Two days of work. If the graph does not beat plain retrieval by a wide
+margin, the project is finished and should say so.
 
 ## 3. The bookkeeping is wrong far more often than it looks — and the validator cannot tell
 
-**Severity: severe. Probability: already happened.**
+**Severity: severe. Probability: already happened, measured.**
 
-This is the most important entry, because it is measured rather than argued.
+This is measured rather than argued, which is why it belongs high.
 
 The pilot is eight proofs from first-year algebra, written carefully, and
 `proofgraph validate --strict` reported **"ok — 14 nodes, 52 proof edges, no
@@ -63,194 +71,261 @@ findings."** An adversarial review of the same files then found:
 - **5 blocking defects** — three steps that did not follow from what they cited
   (two asserted the *converse* of associativity without citing symmetry of
   equality; one applied the inverse axiom to a product without citing closure),
-  one step that nothing cited although two later steps needed it, and one
-  module-wide convention that was not a predicate on the mathematics at all.
+  one step nothing cited although two later steps needed it, and a module
+  convention that was not a predicate on the mathematics at all.
 - **8 further should-fix defects**, including four `formalization:` links
-  pointing at properties the module never uses — L1 linked reflexivity while all
-  fifteen of its uses are symmetry or transitivity.
+  pointing at properties the module never uses — the equality node linked
+  reflexivity while all fifteen of its uses are symmetry or transitivity.
 - Two prose passages asserting something **false** about the axiom system.
 
-Correcting them took the module from **52 to 63 proof edges**. Twenty percent of
-the true dependency structure was missing, in the easiest mathematics that exists,
-in a repository whose entire purpose is getting this right.
+Correcting them took the module from **52 to 63 proof edges: 17.5% of the true
+dependency structure was missing**, in the easiest mathematics that exists, in a
+repository whose entire purpose is getting this right.
 
-Now extrapolate. The interesting structure appears at 10⁴–10⁵ nodes. At the
-observed defect rate, an unreviewed graph at that scale is not a slightly noisy
-reference — it is a confident-looking artefact that is wrong about a fifth of its
-own claims, which is worse than no graph, because people would rely on it.
+**Mitigation:** two-reviewer sign-off, which is policy in
+[CONTRIBUTING.md](../CONTRIBUTING.md). Note what it concedes: the binding
+constraint is expert attention, and it does not scale with funding or tooling.
 
-**Mitigation:** two-reviewer sign-off before `reviewed`, which is policy in
-[CONTRIBUTING.md](../CONTRIBUTING.md). Note what this concedes: **the binding
-constraint is expert attention, and it does not scale with funding or tooling.**
+## 4. Missing edges are structurally undetectable, and error compounds along a closure
 
-## 4. Verification cost equals authoring cost, so automation saves nothing
+**Severity: fatal. Probability: near-certain.**
+
+There are two error classes and they are not symmetric. A **wrong** citation is
+detectable by sampling the emitted edges. A **missing** citation is invisible to
+any inspection of the emitted set, because absence has no surface. The only
+detector for recall failure is re-deriving the proof — which costs what authoring
+cost.
+
+So the cheap QA loop any funded project actually runs — sample 200 edges, report
+94% precision — is **silent on recall by construction**. And the flagship query is
+a transitive closure: per-edge error compounds multiplicatively along exactly the
+path the graph is sold on. Section 3 measured recall failure at 17.5% on the
+easiest possible input.
+
+**Mitigation, partial:** propagate per-edge status through `ancestors`/`why` so
+every query reports the weakest link in its closure. That is honest, and it will
+show that every interesting query currently rests on `draft` edges — which is an
+argument for not shipping the queries yet.
+
+## 5. Granularity is a free parameter, so every published number measures the author's style
+
+**Severity: fatal. Probability: certain.**
+
+There is no canonical decomposition of an informal proof, and the pilot
+demonstrates it against itself: T2 steps 3, 5 and 7 each assert *two* equations
+under one step number, and T6 takes twelve steps for a result mathlib proves in
+one line and Metamath in tens.
+
+A contributor who splits conjoined claims produces different step counts, a
+different edge multiset, and different values for depth and citations-per-step.
+Two people's versions of the same theorem are not comparable, so cross-module
+queries and every aggregate statistic measure prose style rather than
+mathematics.
+
+**Mitigation:** none that keeps both properties. Forcing canonical granularity
+means one inference rule per step — which is Metamath: 25 years old, complete,
+machine-checked, and read at step level by approximately nobody. Leaving it free
+means the aggregates mean nothing. This is a genuine fork in the road and it has
+not been resolved.
+
+## 6. Stable sub-proof identity — the one defensible contribution — was designed out on line one
+
+**Severity: was fatal. Status: FIXED, and it is the best evidence in this file.**
+
+[PRIOR-ART.md](PRIOR-ART.md) §5 and the roadmap both named "stable identity for
+sub-proof nodes" as the actual hard technical content and the project's most
+defensible claim. Meanwhile `schema/node.schema.json` **required** steps to be
+numbered exactly `1..n` with no gaps, and `check_step_numbering` hard-errored
+otherwise. Inserting one step at position 3 renumbered 3 through 12, breaking
+every external reference — including the README's own flagship example, "step 12
+of T6".
+
+The format named the problem in its documentation and forbade the fix in its
+schema.
+
+**Fixed**, because it was cheap at 14 nodes and would have been impossible at
+1,400: steps now carry an immutable `id`, `n` is presentation-only, citations use
+`s:<id>`, edges carry both, and addresses are `T6#conclude`. See
+[SPEC.md](SPEC.md#4a-step-identity-n-is-not-an-address). There is a test that
+inserts a step and asserts every stable address still denotes the same line.
+
+The residual risk is not gone: nothing yet answers what an address should mean
+when a step is *split in two*, or when the proof is replaced wholesale.
+
+## 7. The quality ladder is unreachable by construction
+
+**Severity: fatal. Probability: likely.**
+
+`reviewed` requires two non-author experts checking every step. Reviewing a
+step-level citation list is **not cheaper than authoring it** — establishing that
+`by: [s:pick-inverse, L2, A1]` is both correct and *complete* requires
+reconstructing the inference, which is the authoring task. So a trustworthy node
+costs roughly three times an untrusted one.
+
+Current state: 0 reviewed, 0 verified, 8 drafts, one maintainer. Contributors
+need `reviewed` content to trust the artefact enough to contribute, and
+`reviewed` needs contributors. No obtainable grant breaks that loop, because the
+grants fund tokens and the bottleneck is expert hours.
+
+**Mitigation, small but real:** get exactly one node to `verified` against a
+checked Lean artefact before asking anyone for anything, and make
+`proofgraph stats` print reviewed/total on every run so the zero is impossible to
+look away from.
+
+## 8. <a id="overclaiming"></a>Overclaiming — and the public surface currently contradicts the repository
+
+**Severity: fatal. Probability: high, and it fires on day one.**
+
+The repository's own documents forbid Millennium-Problem and Ramanujan framing.
+**The grant application drafts sitting beside it do not.** `Applications/Pace
+Fellowship.txt` names "proving complex theorems, such as those in the last of
+Ramanujan's notebooks" as the ambitious goal, says development "should be as
+automated as possible; for that, LLM APIs will be necessary", and claims the
+graph will reveal "circularity in the references (indicating that a new axiom may
+be necessary)" in Physics — a confused claim, since a proof graph is acyclic by
+construction and a cycle indicates an error, not a missing axiom.
+
+Two independent crank markers in one paragraph, addressed to exactly the audience
+that dismisses silently. Nobody writes to explain why they stopped reading.
+
+Stated flatly: **a proof graph records the provenance of proofs that already
+exist; it cannot supply a proof that does not.** Liquid Tensor took ~18 months and
+~25 people; the Fermat's Last Theorem project is funded into 2029. That labour
+does not compress.
+
+**Mitigation:** rewrite or withdraw the application text before it is submitted,
+and audit the Encode / Pillar VC / Agency Fund derivatives line by line against
+the "not on the roadmap" section of [ROADMAP.md](ROADMAP.md). This failure mode is
+unusual in being entirely self-inflicted and entirely avoidable.
+
+## 9. The validator is a Goodhart target measuring syntax
+
+**Severity: severe. Probability: near-certain under any automation.**
+
+The validator enforces three syntactic properties: citations resolve, no step is
+unjustified, schema satisfied. All three are trivially satisfied by citing a
+real, well-known lemma **that does not apply** — the characteristic failure of
+both an LLM and a tired human.
+
+Under automation it gets actively worse: a model retried against the schema
+reaches ~100% CI-green, at which point "all nodes pass strict validation" carries
+no information at all. Measured supporting evidence: at n=14, roughly 40% of the
+cross-formalism `formalization:` links were defective — pointing at membership
+lemmas rather than the equations actually used — and every one passed validation.
+
+**Mitigation, partial:** resolve every `lean` name against a pinned mathlib
+declaration index in CI. That catches dangling and malformed names. It cannot
+catch statement mismatch, which is the actual defect and requires comparing
+propositions across formalisms.
+
+## 10. Verification cost equals authoring cost, so automation saves nothing
 
 **Severity: severe. Probability: near-certain.**
 
-The obvious response to section 3 is "use an LLM to draft nodes." But an
-LLM-proposed dependency edge is cheap to generate and expensive to check. Unlike
-code, which has tests, or Lean, which has a kernel, an informal proof graph has
-**no cheap oracle**. The characteristic error is not gibberish — it is a citation
-that is plausible, names a real theorem, and does not justify the step. Detecting
-one requires doing the mathematics.
+An LLM-proposed edge is cheap to generate and expensive to check. Unlike code
+(tests) or Lean (a kernel), an informal proof graph has **no cheap oracle**. If
+checking a node costs what writing it costs, generation throughput is irrelevant
+— the review queue is the whole system, and generating faster than reviewing
+converts a checked artefact into an unchecked one.
 
-If checking a node costs roughly what writing it costs, generation throughput is
-irrelevant; the review queue is the whole system. Generating faster than
-reviewing converts the graph from a checked artefact into an unchecked one, which
-destroys the only property it has.
+**Mitigation:** the ban on bulk generation and mandatory `assisted_by`
+disclosure. Both are policy, weakly enforced, and will be under pressure the
+moment anyone wants the node count to grow.
 
-**Mitigation:** the ban on bulk generation, and mandatory `assisted_by`
-disclosure. Both are policy, both are weakly enforced by CI, and both will be
-under pressure the moment anyone wants the node count to grow.
+## 11. The format has never met the constructs where step attribution is hard
 
-## 5. Conventions that are not predicates on the mathematics silently void the edges they govern
+**Severity: severe. Probability: certain.**
 
-**Severity: severe. Probability: already happened.**
+Measured in-repo: 14 nodes, 63 proof edges, 50 steps, six assumptions, max depth
+3, and six of eight theorems are frontier nodes nothing builds on.
 
-The pilot's original closure convention said: cite the closure axiom only where a
-step's *content* is that some element lies in G. That sounds reasonable and is
-not a rule at all — which steps have membership as their content is the author's
-choice of what to write down, so two careful contributors can apply it to the
-same proof and disagree with no fact settling it.
+Consequences: the flagship `why` query is close to vacuous at this size — with
+six assumptions and depth ≤ 3, "what does this rest on" answers "nearly
+everything". There is no induction, no case analysis, no proof by contradiction
+(the `assumption` token exists and has never been used in anger). One module, so
+`imports` is exercised only by tests. And every proof was co-designed with the
+tool that renders it.
 
-The measured consequence: closure was load-bearing but uncited at seven steps,
-while the axiom's only two edges came from optional bookkeeping lines, one of
-which nothing referenced. **The axiom had edges, and they pointed at the wrong
-places** — the most dangerous possible state, because the graph looked complete.
+**Mitigation, immediate:** invert the roadmap. Transcribe someone else's proof by
+induction, unmodified, **before writing node 15**. If the format survives, the
+pilot's evidence starts to be worth something; if not, that is learned in a week
+rather than a year.
 
-Every convention carries this risk, and a growing graph accumulates conventions.
-See [SPEC.md](SPEC.md#the-closure-convention) for the corrected rule and the test
-a convention must pass.
-
-## 6. Stable identity for sub-proof nodes is unsolved, and it is load-bearing
+## 12. Bus factor of one, and the substitution pattern has already started
 
 **Severity: severe. Probability: likely.**
 
-The whole pitch is that an edge points at *step 12 of T6*. What is that node
-after someone reorders the proof, splits a step in two, or replaces the proof
-entirely? Declaration-level tools get identity free from fully-qualified names.
-Step-level tools have no equivalent, and nothing in the literature solves it.
+The mechanism, not the platitude. Months 0–2 are self-sustaining because building
+the system yields daily discrete artefacts requiring no other human — schema,
+loader, validator, renderer, exporter, ~1,400 lines, all done. Months 3–12 remove
+that fuel: the remaining work is transcribing textbook lemmas that add no
+capability and generate no external signal.
 
-This is the project's most defensible technical claim and simultaneously its
-largest unmitigated risk: a design problem, not an engineering-effort problem,
-which a small project might crack or might simply be stuck on indefinitely. If it
-is not solved, every cross-proof edge rots on the first refactor and the graph
-degrades into exactly the hand-maintained index it was built to replace.
+The documented substitution is writing *about* the project instead of doing it.
+This repository currently has more words in `docs/` than mathematics in `graph/`.
 
-**Mitigation:** none yet. It is Phase 4 of [ROADMAP.md](ROADMAP.md) and should be
-attacked before the graph is large enough for the answer to matter.
+**Mitigation, structural only** — motivation cannot be fixed by resolve. Either an
+external deadline owned by somebody else (commit publicly on Lean Zulip to a
+named result by a named date, so someone notices if it does not appear), or a
+co-maintainer with commit rights.
 
-## 7. <a id="overclaiming"></a>Overclaiming destroys the credibility the project runs on
-
-**Severity: fatal. Probability: likely without deliberate restraint.**
-
-The project has 14 nodes of elementary group theory and **zero** verified nodes.
-Putting "Millennium Problems" or "prove unproven Ramanujan notebook entries" in a
-README, a grant application, or a pitch is the single fastest way to be dismissed
-by every mathematician and every funder who matters — and dismissal in this field
-is silent. Nobody writes to explain why they stopped reading.
-
-Stated flatly: **a proof graph records the provenance of proofs that already
-exist. It cannot supply a proof that does not.** There is no mechanism by which
-step-level dependency edges bear on any Millennium Problem. Proving Lost Notebook
-entries needs q-series and modular-forms expertise that a graph does not supply.
-And the labour of real formalization does not compress — Liquid Tensor took ~18
-months and ~25 people; the Fermat's Last Theorem project is funded and scheduled
-into 2029.
-
-This failure mode is unusual in being **entirely self-inflicted and entirely
-avoidable.** One sentence converts a credible infrastructure project into a crank
-signal. The project's own maintainer is the only person who can prevent it.
-
-**Mitigation:** those targets are explicitly out of scope in
-[ROADMAP.md](ROADMAP.md), and this paragraph exists so the temptation is
-pre-committed against in public.
-
-## 8. Scope diffusion and crank adjacency
-
-**Severity: severe. Probability: likely.**
-
-The repository must convince two audiences — working mathematicians and
-prospective contributors — and both decide in about thirty seconds. A repository
-that is simultaneously formal-methods infrastructure, a physics research
-programme, a collaboration hub, and a grant vehicle reads as none of them.
-
-Hosting a personal speculation about gravity next to a machine-validated proof
-artefact is the specific hazard. The mitigation adopted here is to make the
-boundary visible and to hold the speculation to a *higher* evidential standard
-than the mathematics: [OPEN-PROBLEMS.md](OPEN-PROBLEMS.md) requires an
-**Obstruction section stating what already refutes the idea, placed before the
-problem**, and OP-1 duly opens by conceding that the shell theorem and the
-corollary of Birkhoff's theorem answer the naive form in the negative.
-
-That is a real mitigation, not a cosmetic one, but it is not free: the page still
-costs a reader's attention, and some fraction will not read far enough to see the
-rigour.
-
-## 9. <a id="the-grant-treadmill"></a>The grant treadmill
-
-**Severity: moderate. Probability: plausible.**
-
-Money is not the binding constraint — section 3 is. Winning LLM credits buys
-generation capacity for a pipeline whose bottleneck is review, so the likely
-result is a larger unreviewed graph plus a reporting obligation. Grants also
-create output pressure precisely where the project most needs the discipline to
-go slowly, and when the credits end the node count is higher and the review debt
-is worse.
-
-**Mitigation:** [FUNDING.md](FUNDING.md) says to apply when there is something a
-reviewer would want to read, not in order to create it, and to budget for paying
-people to *check* nodes rather than for tokens.
-
-## 10. The demo trap
-
-**Severity: moderate. Probability: near-certain.**
-
-The pilot was written by people who knew the format, in a domain chosen because
-it is easy. It is therefore unrepresentative in at least four ways: it is pure
-equational reasoning; it has no induction, no case analysis, and no proof by
-contradiction (the `assumption` token exists and has never been used in anger);
-it is one module, so `imports` is exercised only by tests; and every proof was
-co-designed with the tool that renders it.
-
-An elegant small demo systematically misleads its author about feasibility.
-Phase 2 of [ROADMAP.md](ROADMAP.md) exists to break it deliberately.
-
-## 11. Contributor supply, not tooling, is the binding constraint
+## 13. Contributor supply, not tooling, is the binding constraint
 
 **Severity: fatal. Probability: likely.**
 
 The pool of people who can both do mathematics and write structured data files is
-small, and mathlib is its Schelling point. A new project competes with a
-772-contributor incumbent for the same scarce hours while offering less
-immediate value.
+small, and mathlib — 772 contributors — is its Schelling point. A new project
+competes for the same scarce hours while offering less immediate value. And
+outsider projects in mathematics get *ignored*, not critiqued, so the feedback
+that would let the project correct is exactly the feedback it will not receive.
 
-Worse, the founder is not a mathematician by training. That is not
-disqualifying — but it raises the credibility cost of every claim, and
-mathematicians tend to ignore outsider projects rather than critique them, so the
-feedback that would let the project correct is exactly the feedback it will not
-receive.
-
-**Mitigation:** ask for something small, specific, and technical rather than for
+**Mitigation:** ask for something small, specific and technical rather than for
 belief. [CALL-FOR-COLLABORATION.md](CALL-FOR-COLLABORATION.md) leads with "find a
 step that does not follow" for this reason. Partial at best.
 
-## 12. Obsolescence mid-build
+## 14. <a id="the-grant-treadmill"></a>The grant treadmill
+
+**Severity: moderate. Probability: plausible.**
+
+Money is not the binding constraint; sections 3 and 7 are. Credits buy generation
+capacity for a pipeline whose bottleneck is review, so the likely result is a
+larger unreviewed graph plus a reporting obligation. When the credits end, the
+node count is higher and the review debt is worse.
+
+**Mitigation:** [FUNDING.md](FUNDING.md) says to apply when there is something a
+reviewer would want to read, and to budget for paying people to *check* nodes.
+
+## 15. Obsolescence mid-build
 
 **Severity: severe. Probability: plausible.**
 
-Frontier systems are moving into this territory now. DeepMind's Aletheia
-autonomously resolved four open problems from the Erdős database
-([arXiv:2602.10177](https://arxiv.org/abs/2602.10177)); Gemini Deep Think reports
-up to 90% on IMO-ProofBench Advanced. If models can retrieve and chain lemmas
-end-to-end, the residual value of a hand-built retrieval graph shrinks while it
-is being built.
+DeepMind's Aletheia autonomously resolved four open problems from the Erdős
+database ([arXiv:2602.10177](https://arxiv.org/abs/2602.10177)); Gemini Deep
+Think reports up to 90% on IMO-ProofBench Advanced. TheoremGraph already exposes
+an informal dependency graph as an MCP tool. If models retrieve and chain lemmas
+end-to-end, a hand-built retrieval graph loses value while it is being built.
 
-The counter-argument is the one place this project's thesis strengthens as models
-improve: **the more mathematics machines produce, the more valuable
-step-level provenance becomes**, because provenance is how a claim is audited. But
-that is a bet on the auditing market, not on the retrieval market, and it should
-be stated as a bet.
+The counter-argument is the one place the thesis strengthens as models improve:
+**the more mathematics machines produce, the more valuable provenance becomes**,
+because provenance is how a claim is audited. That is a bet on the auditing
+market rather than the retrieval market, and it should be stated as a bet.
+
+## 16. Scope diffusion and crank adjacency
+
+**Severity: severe. Probability: likely.**
+
+The repository must convince working mathematicians and prospective contributors,
+and both decide in about thirty seconds. A repository that is simultaneously
+formal-methods infrastructure, a physics research programme, a collaboration hub
+and a grant vehicle reads as none of them.
+
+The mitigation adopted is to hold the speculation to a *higher* evidential
+standard than the mathematics: [OPEN-PROBLEMS.md](OPEN-PROBLEMS.md) requires an
+Obstruction section stating what already refutes the idea, **placed before the
+problem**, and OP-1 duly opens by conceding that the shell theorem and the
+corollary of Birkhoff's theorem answer its naive form in the negative. That is
+real, not cosmetic — but it still costs a reader's attention, and some fraction
+will not read far enough to see it.
 
 ---
 
@@ -259,39 +334,91 @@ be stated as a bet.
 Observable conditions under which this should be abandoned or radically
 rescoped. Written now, while it is cheap to be honest.
 
-1. **Six months from first public release, no external contributor has merged a
-   node or filed a substantive correctness issue.** Contributor supply is the
-   binding constraint; failing to attract one person is the answer.
-2. **The Phase 3 ground-truth experiment shows systematic divergence.** If
-   hand-authored step-level provenance disagrees materially with kernel-verified
-   premise data on the ~17 Lean-formalized Erdős solutions, the central claim is
-   false and no amount of tooling repairs it.
-3. **A second adversarial review of reviewed nodes finds blocking defects at a
-   similar rate to the first.** Section 3 is survivable if review catches
-   defects; it is fatal if review does not.
-4. **Stable sub-proof identity has no credible design after a serious attempt.**
-   Without it, cross-proof edges rot on refactor and the artefact degrades to a
-   hand-maintained index.
-5. **The node count grows faster than the reviewed count for two consecutive
-   quarters.** That is the graph turning into an unchecked artefact, measurable
-   directly from `proofgraph stats`.
-6. **A funder or a maintainer of Metamath, mathlib or the Stacks Project reads
-   the prior-art page and says the residual gap is not real.** They are better
-   placed to judge than the maintainer is.
+1. **Six months after the repository is public** (clock starts when the `OWNER`
+   placeholder is replaced and the first Zulip/Discourse post goes up): **zero
+   nodes have reached `reviewed`** under the unmodified two-non-author rule.
+   Tripwires counting as the same failure: the maintainer reviews his own node,
+   an LLM pass is counted as a reviewer, or `reviewed` is redefined to mean "the
+   validator passes."
+2. **Eight weeks after the first public post**, no external person has opened an
+   issue or PR touching a file under `graph/`. Courteous replies that lead to no
+   clone do not count — terminal politeness is the documented signature of silent
+   dismissal.
+3. **Inter-annotator agreement fails.** Two people who are not the maintainer
+   independently author step-level citations for the same 10 informal proofs and
+   their edge sets agree at **Jaccard < 0.7** (≈ Cohen's κ < 0.6 on per-premise
+   inclusion). If competent humans cannot agree on what an edge is, there is
+   nothing to measure and no basis for the two-reviewer rule.
+4. **The head-to-head ablation fails.** On 30 blind steps from outside the pilot,
+   a frontier model with web search and no graph reproduces step-level
+   attributions within 10 percentage points of the graph's own accuracy, judged
+   by a third party. Run within 60 days; **refusing to run it is itself the
+   failure condition.**
+5. **The format breaks on its first non-equational proof.** Transcribing an
+   unmodified textbook induction or case analysis needs more than one ad hoc
+   schema field across the first three such proofs.
+6. **Output outruns verification.** In any month, nodes added exceed nodes
+   reaching `reviewed` by more than 5:1, or words added to `docs/` exceed words
+   added to `graph/`. Both are visible from `git diff --stat` alone. *(By this
+   measure the project is already failing, and that is the point of writing it
+   down.)*
+
+## The scope recommendation
+
+The adversarial review's conclusion, recorded because it is more useful than a
+comfortable one:
+
+> **Stop building a knowledge graph. Convert the project into a single bounded,
+> pre-registered measurement study with a paper as its deliverable.**
+
+The one question here that is genuinely open, cheap to answer, and useful
+whichever way it comes out:
+
+**Do competent humans agree with each other about step-level premise attribution
+in informal proofs, and how does that agreement compare to kernel-extracted
+premises for the same theorems?**
+
+Nobody has measured this. TheoremGraph, LeanDojo, `leanblueprint` and the Stacks
+Project all sidestep it — they either have a kernel, so attribution is exact and
+free, or they work at statement granularity, so the question never arises. It is
+the one place where this format, validator and pilot are assets rather than
+liabilities, and it is answerable by one person in three to four months.
+
+Concretely: 40–60 short informal proofs from a standard source; two annotators
+who are not the maintainer, paid ~$40–60/hr — about **$15–25K, which is a
+defensible grant ask in a way that "API credits to populate a graph" is not**.
+Pre-register the sample size, the agreement statistic and the threshold *before*
+any data exists. Report inter-annotator agreement as the primary result, and
+divergence against LeanDojo premises as a secondary, descriptive result
+explicitly labelled as comparing **two different proofs** rather than as an error
+rate. Publish the disagreement cases verbatim — they are the most interesting
+output and no existing dataset contains them.
+
+Note this supersedes the Erdős experiment as originally written in the roadmap.
+That experiment was **logically invalid**: a human's informal proof and a Lean
+formalization of the same theorem are *different proofs*, so divergence between
+their premise sets is not an error rate and the kill criterion could never fire.
+[ROADMAP.md](ROADMAP.md) has been corrected.
+
+If agreement comes back high, there is a real finding and a basis for asking for
+corpus money. If it comes back low, the question is closed in four months instead
+of discovered in year three.
+
+---
 
 ## The honest summary
 
 The strongest version of this project is **not** "a knowledge graph of
-mathematics." It is:
+mathematics". It is:
 
-> A format and validator for recording *step-level provenance in informal
-> mathematics*, with a solution to stable sub-proof identity, ground-truthed
-> against kernel-verified premise data.
+> A pre-registered measurement of whether step-level provenance in informal
+> mathematics is a well-defined object at all — using a format with stable
+> sub-proof identity, benchmarked against kernel-extracted premises.
 
-That is narrow, unglamorous, achievable by a small team, and genuinely
-unoccupied. It is also much less exciting than the idea that brought anyone here,
-and the gap between those two things is where projects like this usually die.
+That is narrow, unglamorous, achievable by one person, and genuinely unoccupied.
+It is much less exciting than the idea that brought anyone here, and the gap
+between those two things is where projects like this usually die.
 
 If you are deciding whether to contribute: the mathematics in this repository is
-correct, the tooling is real, the prior-art page is not hiding anything, and the
-odds are still against it. That is the accurate picture.
+correct, the tooling is real, the prior-art page hides nothing, and the odds are
+still against it. That is the accurate picture.

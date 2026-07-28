@@ -22,6 +22,7 @@ EdgeKind = Literal["proof", "vocabulary"]
 #: create no edge: the theorem's own hypotheses, and earlier steps.
 _LOCAL_HYP = re.compile(r"^hyp(?::(?P<name>[A-Za-z0-9_.-]+))?$")
 _LOCAL_STEP = re.compile(r"^s(?P<n>\d+)$")
+_LOCAL_STEP_ID = re.compile(r"^s:(?P<sid>[a-z0-9][a-z0-9-]*)$")
 _LOCAL_OTHER = frozenset({"assumption"})
 
 
@@ -29,11 +30,18 @@ def classify_token(token: str) -> tuple[str, str | None]:
     """Classify a `by:` entry.
 
     Returns ``(kind, payload)`` where kind is one of ``"hyp"``, ``"step"``,
-    ``"assumption"``, or ``"node"``. Only ``"node"`` tokens become edges.
+    ``"stepid"``, ``"assumption"``, or ``"node"``. Only ``"node"`` tokens become
+    edges.
+
+    ``s3`` and ``s:collapse-inner`` both name an earlier step of the same proof.
+    The difference is what survives an edit: see :class:`Step`.
     """
     m = _LOCAL_HYP.match(token)
     if m:
         return "hyp", m.group("name")
+    m = _LOCAL_STEP_ID.match(token)
+    if m:
+        return "stepid", m.group("sid")
     m = _LOCAL_STEP.match(token)
     if m:
         return "step", m.group("n")
@@ -44,10 +52,35 @@ def classify_token(token: str) -> tuple[str, str | None]:
 
 @dataclass(frozen=True)
 class Step:
+    """One line of a proof.
+
+    Two names, doing different jobs:
+
+    ``n``
+        The presentation ordinal, contiguous from 1. It says where the step sits
+        in the reading order and **it is not stable** — inserting a step renumbers
+        everything after it.
+
+    ``sid``
+        An immutable identifier, assigned once and never reused, even if the step
+        is deleted. This is what an edge from outside the proof must point at.
+
+    The distinction is the whole reason the project can claim to address stable
+    sub-proof identity rather than merely naming it as an open problem. An edge
+    addressed as "step 12 of T6" breaks the first time somebody inserts a step at
+    position 3; an edge addressed as ``T6#collapse-outer`` does not.
+    """
+
     n: int
     claim: str
     by: tuple[str, ...]
     note: str | None = None
+    sid: str | None = None
+
+    @property
+    def ref(self) -> str:
+        """How to address this step from outside: stable if it can be, else ordinal."""
+        return f"#{self.sid}" if self.sid else f"step {self.n}"
 
     def node_refs(self) -> list[str]:
         return [t for t in self.by if classify_token(t)[0] == "node"]
@@ -55,21 +88,39 @@ class Step:
     def step_refs(self) -> list[int]:
         return [int(p) for k, p in map(classify_token, self.by) if k == "step"]
 
+    def step_id_refs(self) -> list[str]:
+        return [p for k, p in map(classify_token, self.by) if k == "stepid"]
+
     def hyp_refs(self) -> list[str | None]:
         return [p for k, p in map(classify_token, self.by) if k == "hyp"]
 
 
 @dataclass(frozen=True)
 class Edge:
-    """A dependency, always traceable to the line of proof that created it."""
+    """A dependency, always traceable to the line of proof that created it.
+
+    ``step`` is where the reader will find it today; ``step_id`` is what still
+    means the same thing after the proof is edited. Anything durable — a citation
+    in a paper, a link from another module — must use ``step_id``.
+    """
 
     src: str
     dst: str
     kind: EdgeKind
     step: int | None = None
+    step_id: str | None = None
+
+    @property
+    def address(self) -> str:
+        if self.step_id:
+            return f"{self.src}#{self.step_id}"
+        return f"{self.src} step {self.step}" if self.step is not None else self.src
 
     def __str__(self) -> str:
-        where = f" (step {self.step})" if self.step is not None else ""
+        where = ""
+        if self.step is not None:
+            where = f" (step {self.step}"
+            where += f", #{self.step_id})" if self.step_id else ")"
         return f"{self.src} -> {self.dst} [{self.kind}]{where}"
 
 
@@ -111,7 +162,7 @@ class Node:
             out.append(Edge(self.id, dep, "vocabulary", None))
         for step in self.steps:
             for dep in step.node_refs():
-                out.append(Edge(self.id, dep, "proof", step.n))
+                out.append(Edge(self.id, dep, "proof", step.n, step.sid))
         return out
 
     def proof_deps(self) -> set[str]:

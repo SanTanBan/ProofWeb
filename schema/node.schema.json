@@ -56,9 +56,14 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["n", "claim", "by"],
+            "required": ["n", "claim", "by", "id"],
             "properties": {
-              "n": { "type": "integer", "minimum": 1, "description": "Step number, 1-based and contiguous." },
+              "n": { "type": "integer", "minimum": 1, "description": "Presentation ordinal, 1-based and contiguous. NOT stable: inserting a step renumbers everything after it. Never address a step by `n` from outside the proof." },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "description": "Immutable identifier, unique within this proof, assigned once and NEVER reused — not even after the step is deleted. This is the only stable address a step has: `T6#collapse-outer`. Choose a name for what the step does, not where it sits."
+              },
               "claim": { "type": "string", "minLength": 1, "description": "What this step asserts." },
               "by": {
                 "type": "array",

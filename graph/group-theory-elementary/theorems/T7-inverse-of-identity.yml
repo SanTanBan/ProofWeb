@@ -9,16 +9,19 @@ proof:
   strategy: 'e·e = e = e·e'' says e is an inverse of e; uniqueness does the rest.'
   steps:
     - n: 1
+      id: identity-squared
       claim: "e·e = e"
       by: [A3]
       note: 'The identity property of e, instantiated at a := e.'
     - n: 2
+      id: identity-times-inverse
       claim: "e·e' = e"
       by: [A3, A4]
       note: "A4 gives e·e' = e directly, e being an element of G by A3."
     - n: 3
+      id: conclude
       claim: "e' = e"
-      by: [s1, s2, T4, L1]
+      by: [s:identity-squared, s:identity-times-inverse, T4, L1]
       note: "T4 with outer element e, comparing the candidate inverses e' and e."
 status: draft
 formalization:

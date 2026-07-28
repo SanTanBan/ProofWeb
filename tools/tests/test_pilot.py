@@ -111,12 +111,38 @@ def test_html_export_is_self_contained_and_carries_step_numbers():
 def test_explain_reports_the_step_a_dependency_entered_at():
     graph, _ = validate(GRAPH)
     text = explain(graph, "T6")
-    assert "used directly at step 12" in text
+    # Stable addresses, not ordinals: an ordinal in a citation goes stale the
+    # first time somebody inserts a step.
+    assert "T4     Inverses are unique — used at #conclude" in text
+    assert "[T6#conclude]" in text
     assert "T2" in text and "indirectly" in text
     assert "No such node" not in text
     assert "No such node: nope" in explain(graph, "nope")
 
 
-def test_summary_reports_formalization_coverage():
+def test_every_step_of_every_proof_has_a_stable_id():
+    """The one property that makes an external citation survive an edit."""
     graph, _ = validate(GRAPH)
-    assert "formalized       14/14" in summarise(graph)
+    missing = [f"{n.id} step {s.n}" for n in graph for s in n.steps if not s.sid]
+    assert not missing, f"steps with no stable id: {missing}"
+
+    for node in graph:
+        ids = [s.sid for s in node.steps]
+        assert len(ids) == len(set(ids)), f"{node.id} reuses a step id"
+
+
+def test_no_proof_cites_an_earlier_step_by_ordinal():
+    """`s3` still resolves after an insertion — pointing at the wrong line."""
+    graph, _ = validate(GRAPH)
+    offenders = [f"{n.id} step {s.n}" for n in graph for s in n.steps if s.step_refs()]
+    assert not offenders, f"ordinal step citations: {offenders}"
+
+
+def test_summary_reports_formalization_and_review_coverage():
+    graph, _ = validate(GRAPH)
+    text = summarise(graph)
+    assert "formalized       14/14" in text
+    # The review counter must always print. Kill criterion 1 is that it is still
+    # zero in six months, and a number nobody sees cannot fire a kill criterion.
+    assert "reviewed         0/14" in text
+    assert "checked by a second person" in text

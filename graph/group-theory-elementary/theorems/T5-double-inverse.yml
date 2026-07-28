@@ -11,18 +11,22 @@ proof:
     say that a is an inverse of a'. Uniqueness of inverses then forces it to be the inverse.
   steps:
     - n: 1
+      id: inverse-equations
       claim: "a·a' = e and a'·a = e"
       by: [A4]
     - n: 2
+      id: inverse-of-inverse
       claim: "a' is in G, and a' has an inverse (a')' satisfying a'·(a')' = e"
       by: [A4]
       note: "A4 applied to the element a' rather than to a."
     - n: 3
+      id: two-candidates
       claim: "a'·a = e and a'·(a')' = e"
-      by: [s1, s2]
+      by: [s:inverse-equations, s:inverse-of-inverse]
     - n: 4
+      id: conclude
       claim: "(a')' = a"
-      by: [s3, T4, L1]
+      by: [s:two-candidates, T4, L1]
       note: "T4 applied with the outer element a', comparing the two candidate inverses (a')' and a."
 status: draft
 formalization:

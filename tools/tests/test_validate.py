@@ -158,6 +158,94 @@ def test_theorem_citing_nothing_is_flagged_as_disconnected(make_graph):
     assert "kind.self-contained" in codes(report)
 
 
+def test_inserting_a_step_does_not_change_any_stable_address(make_graph):
+    """The property the whole step-id design exists to provide.
+
+    ProofGraph claims stable sub-proof identity as its defensible contribution.
+    That claim is only worth anything if an address minted today still denotes the
+    same line after the proof is edited — so it is tested, not asserted.
+    """
+    before = make_graph({
+        "A1": axiom(), "A2": axiom(),
+        "T1": theorem("t", [
+            {"n": 1, "id": "setup", "claim": "c", "by": ["A1"]},
+            {"n": 2, "id": "finish", "claim": "d", "by": ["A2", "s:setup"]},
+        ]),
+    })
+    graph, report = validate(before)
+    assert report.ok(strict=True), [str(f) for f in report.findings]
+    old = {(e.dst, e.step_id) for e in graph.get("T1").edges() if e.kind == "proof"}
+    assert old == {("A1", "setup"), ("A2", "finish")}
+
+    # Someone inserts a lemma in the middle. Ordinals all shift.
+    after = make_graph({
+        "A1": axiom(), "A2": axiom(), "A3": axiom(),
+        "T1": theorem("t", [
+            {"n": 1, "id": "setup", "claim": "c", "by": ["A1"]},
+            {"n": 2, "id": "interlude", "claim": "new", "by": ["A3", "s:setup"]},
+            {"n": 3, "id": "finish", "claim": "d", "by": ["A2", "s:interlude"]},
+        ]),
+    })
+    graph2, report2 = validate(after)
+    assert report2.ok(strict=True), [str(f) for f in report2.findings]
+
+    edges = {e.dst: e for e in graph2.get("T1").edges() if e.kind == "proof"}
+    assert edges["A2"].step == 3, "the ordinal moved, as it must"
+    assert edges["A2"].step_id == "finish", "the stable address did not move"
+    assert edges["A2"].address == "T1#finish"
+
+    # An address minted before the edit still denotes the same line after it.
+    assert {("A1", "setup"), ("A2", "finish")} <= {
+        (e.dst, e.step_id) for e in graph2.get("T1").edges() if e.kind == "proof"}
+
+
+def test_reusing_a_step_id_is_an_error(make_graph):
+    root = make_graph({
+        "A1": axiom(),
+        "T1": theorem("t", [
+            {"n": 1, "id": "same", "claim": "c", "by": ["A1"]},
+            {"n": 2, "id": "same", "claim": "d", "by": ["A1"]},
+        ]),
+    })
+    _, report = validate(root)
+    assert "step.duplicate-id" in codes(report)
+
+
+def test_citing_a_later_step_by_stable_id_is_still_a_forward_reference(make_graph):
+    root = make_graph({
+        "A1": axiom(),
+        "T1": theorem("t", [
+            {"n": 1, "id": "first", "claim": "c", "by": ["s:second"]},
+            {"n": 2, "id": "second", "claim": "d", "by": ["A1"]},
+        ]),
+    })
+    _, report = validate(root)
+    assert "step.forward-reference" in codes(report)
+
+
+def test_citing_an_unknown_stable_id_is_an_error(make_graph):
+    root = make_graph({
+        "A1": axiom(),
+        "T1": theorem("t", [{"n": 1, "id": "only", "claim": "c", "by": ["A1", "s:ghost"]}]),
+    })
+    _, report = validate(root)
+    assert "step.missing-id" in codes(report)
+
+
+def test_ordinal_citations_are_warned_about_when_ids_exist(make_graph):
+    root = make_graph({
+        "A1": axiom(),
+        "T1": theorem("t", [
+            {"n": 1, "id": "a", "claim": "c", "by": ["A1"]},
+            {"n": 2, "id": "b", "claim": "d", "by": ["A1", "s1"]},
+        ]),
+    })
+    _, report = validate(root)
+    assert "step.ordinal-citation" in codes(report)
+    assert report.ok(), "fragile, but not incoherent"
+    assert not report.ok(strict=True)
+
+
 def test_malformed_yaml_is_reported_not_raised(make_graph):
     root = make_graph({"A1": axiom()})
     (root / "test" / "broken.yml").write_text("id: X\nkind: [unclosed\n", encoding="utf-8")

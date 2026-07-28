@@ -59,6 +59,11 @@ something elementary without contortion.
 The pilot was written knowing the format. That is the demo trap: the small case
 is unrepresentative precisely because it was co-designed with the tool.
 
+**Do this before writing node 15.** The temptation is to grow the corpus first,
+because transcribing more equational algebra is easy and feels like progress. It
+is the single fastest way to spend a year discovering something a week would have
+shown.
+
 - [ ] **One proof by contradiction, one by induction.** Both stress the model
       differently — induction needs a schema (is it `background`? an axiom? a
       node?), contradiction needs local assumptions discharged mid-proof. The
@@ -73,40 +78,57 @@ is unrepresentative precisely because it was co-designed with the tool.
 **Falsified if:** every non-trivial proof needs a schema extension. That means the
 format encodes equational reasoning about groups, not mathematics.
 
-## Phase 3 — Ground-truth the method against a kernel
+## Phase 3 — Measure whether an edge is a well-defined object at all
 
-**This is the most important milestone on the page**, because it is the only one
-where the project's central claim can be checked against something other than an
-opinion.
+**This is the most important milestone on the page**, and it replaces an earlier
+version of Phase 3 that was **logically invalid**. That version proposed
+authoring the ~17 Lean-formalized Erdős solutions by hand and comparing the
+derived edges against LeanDojo's premise data as ground truth. The flaw: a
+human's informal proof and a Lean formalization of the same theorem are
+*different proofs*. Divergence between their premise sets is not an error rate,
+so the kill criterion could never fire. It is recorded here rather than deleted,
+because the mistake is instructive — it is exactly the kind of plausible,
+motivated, wrong experiment this project exists to catch elsewhere.
 
-The [Erdős problems database](https://www.erdosproblems.com/) has roughly 1,100
-problems, about 40% solved, with **~240 statements formalized in Lean but only
-~17 *solutions* formalized** ([Buzzard, Dec 2025](https://xenaproject.wordpress.com/2025/12/05/formalization-of-erdos-problems/)).
-That 240-versus-17 gap needs no exaggeration to be interesting.
+The corrected question is prior to it, and nobody has answered it:
 
-The experiment:
+> **Do competent humans agree with each other about step-level premise
+> attribution in informal proofs?**
 
-- [ ] For each of those ~17, take the **human-readable published proof** — not
-      the Lean file — and author it as ProofGraph nodes with per-step
-      justifications.
-- [ ] Derive the dependency edges.
-- [ ] Compare them against the premise references extracted from the
-      corresponding Lean proof. [LeanDojo](https://leandojo.org/leandojo.html)
-      already provides step-level premise data for exactly this comparison.
-- [ ] **Publish the confusion matrix**: edges the human proof implies that the
-      Lean proof does not use, and premises the Lean proof needs that the human
-      proof never mentions.
+If they do not, there is nothing to measure, no dispute-resolution procedure, and
+no basis for the two-reviewer rule — and the whole enterprise is unfounded.
+TheoremGraph, LeanDojo, `leanblueprint` and the Stacks Project all sidestep this:
+they either have a kernel, so attribution is exact and free, or they work at
+statement granularity, so the question never arises.
 
-Why this and not something bigger: it is sized for one person, it is bounded, the
-Lean side is already done by someone else, and it has **ground truth**. Every
-other validation of a hand-authored proof graph is somebody's judgement; this one
-is checkable against a kernel. It also lands in a live corpus with an active
-maintainer and forum, so the output is visible to people who can evaluate it.
+The study:
 
-**Exit test:** the confusion matrix is published, whatever it says.
-**Falsified if:** hand-authored step-level provenance systematically diverges from
-kernel-verified provenance. That is a kill-criterion result — and the point is to
-find it out in weeks rather than years.
+- [ ] Pick **40–60 short informal proofs** from a standard source.
+- [ ] Recruit **two annotators who are not the maintainer** (paid; ~$15–25K is
+      the whole budget, and it is a far more defensible grant ask than API
+      credits).
+- [ ] **Pre-register** — before any data exists — the sample size, the agreement
+      statistic, and the threshold below which the answer is "humans do not
+      agree, so hand-authored provenance is not a measurable object."
+- [ ] Primary result: **inter-annotator agreement** (Jaccard on cross-node edge
+      sets; Cohen's κ on per-premise inclusion).
+- [ ] Secondary, descriptive only: divergence against LeanDojo premises for the
+      Lean-formalized subset — **explicitly labelled as comparing two different
+      proofs**, not as an error rate.
+- [ ] **Publish the disagreement cases verbatim.** They are the most interesting
+      output and no existing dataset contains them.
+
+Run alongside it, and much sooner — two days of work:
+
+- [ ] **The ablation.** Frontier model + web search, versus frontier model +
+      ProofGraph, on step-level attribution for 30 blind steps, judged by a third
+      party. If the graph does not beat plain retrieval by a wide margin, the
+      project is finished and should say so.
+
+**Exit test:** the study is published, whatever it says.
+**Falsified if:** agreement comes back below the pre-registered threshold, or the
+ablation shows no advantage. Both are in the kill criteria in
+[RISKS.md](RISKS.md).
 
 ## Phase 4 — The one contribution that might be real
 

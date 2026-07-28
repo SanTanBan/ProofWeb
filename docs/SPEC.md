@@ -95,12 +95,14 @@ proof:                        # required for kind: theorem, forbidden otherwise
   hypotheses:                 # optional; named assumptions the statement discharges
     - "comm: a·b = b·a"
   steps:
-    - n: 1                    # 1-based, contiguous, no gaps
+    - n: 1                    # presentation ordinal: 1-based, contiguous. NOT stable.
+      id: candidate-in-g      # immutable address, never reused. See §4a.
       claim: "b'·a' is an element of G"
       by: [A1, A4]            # see §4
     - n: 2
+      id: reassociate-outer
       claim: "..."
-      by: [s1, A2]
+      by: [s:candidate-in-g, A2]
       note: "Optional commentary. Never load-bearing."
 
 status: draft                 # draft | reviewed | verified — see §7
@@ -138,8 +140,9 @@ Each entry is one of:
 
 | Token | Creates an edge? | Meaning |
 |---|---|---|
-| `A1`, `T4`, `D2`, … | **yes** | Another node. Becomes `this → that`, tagged with the step number. |
-| `s3` | no | Step 3 **of this same proof**. Must be strictly earlier — forward references are circular reasoning and are rejected. |
+| `A1`, `T4`, `D2`, … | **yes** | Another node. Becomes `this → that`, tagged with the step's ordinal *and* its stable id. |
+| `s:candidate-in-g` | no | The step with that `id`, **in this same proof**. Must be strictly earlier — forward references are circular reasoning and are rejected. |
+| `s3` | no | Step 3 by ordinal. Still accepted, and **warned about** whenever stable ids are available: see §4a. |
 | `hyp` | no | The proof's single declared hypothesis. Rejected if the proof declares zero, or more than one. |
 | `hyp:comm` | no | The hypothesis named `comm`. Must be declared. |
 | `assumption` | no | An assumption local to a subproof (e.g. inside a proof by contradiction). |
@@ -152,6 +155,42 @@ in the claim is noise, and noise here is indistinguishable from the graph being
 wrong.
 
 ---
+
+## 4a. Step identity: n is not an address
+
+Every step carries two names, and confusing them is the single most expensive
+mistake this format could make.
+
+| | `n` | `id` |
+|---|---|---|
+| what it is | presentation ordinal, contiguous from 1 | immutable identifier |
+| stable? | **no** — inserting a step renumbers everything after it | **yes**, assigned once |
+| reused? | necessarily | **never**, not even after the step is deleted |
+| address a step from outside? | never | always: `T6#conclude` |
+
+The reason this matters is specific. Suppose a proof cites `s3`, and someone
+later inserts a step at position 2. The citation still resolves. The validator
+still passes. And it now points at a different line. **A silent change of meaning
+that no check can detect is the worst defect this project can have**, and ordinal
+addressing produces it structurally.
+
+The same argument applies with more force to references from *outside* a proof —
+another module, a paper, an issue, a URL. `T6 step 12` is not a durable name for
+anything. `T6#conclude` is.
+
+This is also the project's one substantive technical claim.
+[PRIOR-ART.md](PRIOR-ART.md) records that stable identity for sub-proof nodes is
+unsolved, and an earlier version of this schema *forbade* the fix: steps were
+required to be numbered exactly `1..n`, so every insertion renumbered. The format
+named the problem in its documentation and designed it out in its schema.
+
+**Choosing ids.** Name what the step *does*, not where it sits. `collapse-inner`,
+`drop-identity`, `conclude` — never `step-3`, `first`, `next`. Lowercase, digits
+and hyphens; unique within the proof.
+
+**Deleting a step.** Remove it and renumber `n`. Do **not** reuse its `id` for
+anything, ever — a stale external reference should fail to resolve, which is
+recoverable, rather than silently resolve to an unrelated line, which is not.
 
 ## 5. `context:` — vocabulary edges are not proof edges
 
@@ -252,8 +291,10 @@ fastest way for a project like this to lose the only thing it has.
 `python -m proofgraph validate` enforces:
 
 - every node validates against `schema/node.schema.json`
-- ids are unique; every cited id exists
-- steps are numbered `1..n`; `sK` references point strictly backwards
+- node ids are unique; every cited id exists
+- steps are numbered `1..n`; step ids are unique and never reused within a proof
+- both `s:<id>` and `sK` references resolve and point strictly backwards
+- (warning) a step cites an earlier step by ordinal where a stable id exists
 - cited hypotheses are declared; `hyp` is unambiguous
 - theorems have proofs; axioms, definitions and background do not
 - **the proof graph is acyclic** — nothing is used, transitively, in its own proof

@@ -11,50 +11,62 @@ proof:
     then the outer pair. Uniqueness of inverses upgrades "an inverse" to "the inverse".
   steps:
     - n: 1
+      id: candidate-in-g
       claim: "b'·a' is an element of G"
       by: [A1, A4]
-      note: 'A4 puts b'' and a'' in G; A1 closes the product. Steps 2 and 12 both need this.'
+      note: 'A4 puts b'' and a'' in G; A1 closes the product. Both #reassociate-outer and #conclude need this.'
     - n: 2
+      id: reassociate-outer
       claim: "(a·b)·(b'·a') = a·(b·(b'·a'))"
-      by: [A2, s1]
-      note: "A2 instantiated at (a, b, b'·a'); the third factor lies in G by step 1."
+      by: [A2, s:candidate-in-g]
+      note: "A2 instantiated at (a, b, b'·a'); the third factor lies in G by #candidate-in-g."
     - n: 3
+      id: reassociate-inner
       claim: "b·(b'·a') = (b·b')·a'"
       by: [A2, L1]
       note: "A2 read right to left; the reversal of orientation is symmetry of equality, L1."
     - n: 4
+      id: inner-inverse
       claim: "b·b' = e"
       by: [A4]
     - n: 5
+      id: collapse-inner
       claim: "(b·b')·a' = e·a'"
-      by: [s4, L2, A1]
+      by: [s:inner-inverse, L2, A1]
       note: "L2 substitutes b·b' = e into the left factor; A1 puts the product b·b' in G."
     - n: 6
+      id: drop-identity
       claim: "e·a' = a'"
       by: [A3]
     - n: 7
+      id: inner-collapses
       claim: "b·(b'·a') = a'"
-      by: [s3, s5, s6, L1]
+      by: [s:reassociate-inner, s:collapse-inner, s:drop-identity, L1]
     - n: 8
+      id: substitute-outer
       claim: "a·(b·(b'·a')) = a·a'"
-      by: [s7, L2, A1]
+      by: [s:inner-collapses, L2, A1]
       note: "L2 substitutes into the right factor of a·(−); A1 puts b·(b'·a') in G."
     - n: 9
+      id: outer-inverse
       claim: "a·a' = e"
       by: [A4]
     - n: 10
+      id: product-is-e
       claim: "(a·b)·(b'·a') = e"
-      by: [s2, s8, s9, L1]
+      by: [s:reassociate-outer, s:substitute-outer, s:outer-inverse, L1]
     - n: 11
+      id: canonical-inverse
       claim: "(a·b)·(a·b)' = e"
       by: [A1, A4]
       note: 'A4 applied to the element a·b, which lies in G by A1.'
     - n: 12
+      id: conclude
       claim: "(a·b)' = b'·a'"
-      by: [s1, s10, s11, T4, L1, A1]
+      by: [s:candidate-in-g, s:product-is-e, s:canonical-inverse, T4, L1, A1]
       note: >
         T4 with outer element a·b (in G by A1), comparing the candidate inverses (a·b)'
-        and b'·a' (in G by step 1).
+        and b'·a' (in G by #candidate-in-g).
 status: draft
 formalization:
   metamath: grpinvadd

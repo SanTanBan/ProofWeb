@@ -4,7 +4,7 @@
 declared beside them.**
 
 [![CI](https://github.com/OWNER/proofgraph/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/proofgraph/actions/workflows/ci.yml)
-&nbsp;·&nbsp; 14 nodes &nbsp;·&nbsp; 52 proof edges &nbsp;·&nbsp; MIT (tools) + CC BY 4.0 (content)
+&nbsp;·&nbsp; 14 nodes &nbsp;·&nbsp; 63 proof edges &nbsp;·&nbsp; 0 reviewed &nbsp;·&nbsp; MIT (tools) + CC BY 4.0 (content)
 
 ```
 T6 — The inverse of a product reverses the order
@@ -12,19 +12,25 @@ T6 — The inverse of a product reverses the order
 
   Proof:
     ...
-     12. (a·b)' = b'·a'
-         by s10, s11, T4 (Inverses are unique), L1 (Equality is an equivalence relation)
+     12. (a·b)' = b'·a'  [T6#conclude]
+         by s:candidate-in-g, s:product-is-e, s:canonical-inverse,
+            T4 (Inverses are unique), L1 (Equality is an equivalence relation), A1 (Closure)
 
   Rests on 8 node(s), transitively:
-    A2     Associativity                  — used directly at step 2, 3
-    A4     Existence of inverses          — used directly at step 1, 4, 9, 11
-    T2     Left cancellation              — indirectly
-    T4     Inverses are unique            — used directly at step 12
+    A2     Associativity          — used at #reassociate-outer, #reassociate-inner
+    A4     Existence of inverses  — used at #candidate-in-g, #inner-inverse, #outer-inverse
+    T2     Left cancellation      — indirectly
+    T4     Inverses are unique    — used at #conclude
 ```
 
 That last line is the whole project. `T6 → T4` is not a fact about two theorems.
-It is the fact that **step 12 of T6** is where uniqueness of inverses enters, and
+It is the fact that **`T6#conclude`** is where uniqueness of inverses enters, and
 the graph knows it because the proof said so.
+
+Note the address. Not "step 12" — an ordinal goes stale the moment somebody
+inserts a step, and a citation that silently changes meaning is the worst defect
+this format could have. Every step carries an immutable id; `n` is presentation
+only. See [SPEC.md §4a](docs/SPEC.md#4a-step-identity-n-is-not-an-address).
 
 ---
 
@@ -52,11 +58,11 @@ python -m proofgraph stats
 python -m proofgraph render html -o ../build/proofgraph.html
 ```
 
-Open `build/proofgraph.html`, click node **T6**, then click **step 12**. Exactly
-the two edges that step created light up — `T6→T4` and `T6→L1` — while `s10` and
-`s11` create none, because they are references to earlier steps of the same
-proof. That is the thesis, made clickable. The file is self-contained: no build
-step, no network, no dependencies.
+Open `build/proofgraph.html`, click node **T6**, then click its last step. Exactly
+the edges that step created light up — `T6→T4`, `T6→L1`, `T6→A1` — while the
+`s:`-prefixed citations create none, because they point at earlier steps of the
+same proof. That is the thesis, made clickable. The file is self-contained: no
+build step, no network, no dependencies.
 
 ## What is in here
 
@@ -64,7 +70,7 @@ step, no network, no dependencies.
 |---|---|
 | [`graph/group-theory-elementary/`](graph/group-theory-elementary) | The pilot. 4 group axioms, 2 background principles about equality, 8 theorems. Every proof cites only nodes in this module. |
 | [`schema/node.schema.json`](schema/node.schema.json) | What a node file may contain. |
-| [`tools/proofgraph/`](tools/proofgraph) | Loader, validator, graph queries, exporters (dot / mermaid / json / html). ~1,000 lines, two dependencies. |
+| [`tools/proofgraph/`](tools/proofgraph) | Loader, validator, graph queries, exporters (dot / mermaid / json / html). ~1,400 lines, two dependencies, 47 tests. |
 | [`docs/SPEC.md`](docs/SPEC.md) | What a node file *means*. Start here to contribute mathematics. |
 | [`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) | **Read this before anything else.** Who has already done this, and what is genuinely left. |
 | [`docs/RISKS.md`](docs/RISKS.md) | An adversarial review arguing this project should fail. Kept in its own repository on purpose. |
@@ -106,8 +112,11 @@ overselling.
 2. **Rocq has no LeanDojo.** No step-level premise attribution exists for Rocq at
    all, and `SerAPI` is discontinued — no incumbent to displace.
 3. **Stable identity for a sub-proof node.** What is "step 3 of the proof of X"
-   after someone reorders the proof? Nothing solves this. It is a design problem,
-   and it is the real technical content.
+   after someone reorders the proof? Nothing in the literature solves this. It is
+   a design problem, and it is the real technical content — so this repository
+   has taken a position on it (`T6#conclude`, immutable ids, a test that inserts
+   a step and asserts every address survives). Whether that position is the right
+   one is exactly the kind of argument worth having.
 
 ## Honesty about failure
 
