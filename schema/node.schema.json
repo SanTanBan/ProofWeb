@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/OWNER/proofgraph/schema/node.schema.json",
+  "$id": "https://github.com/SanTanBan/ProofGraph/schema/node.schema.json",
   "title": "ProofGraph node",
   "description": "One axiom, definition, or theorem, together with a proof whose every step carries its own justification. Graph edges are DERIVED from step justifications, never declared by hand.",
   "type": "object",

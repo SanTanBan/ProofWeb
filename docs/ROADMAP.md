@@ -33,10 +33,8 @@ three things nobody has done, in order of how cheaply they can be falsified.
 
 The pilot must survive contact with people who know more than its authors.
 
-- [ ] **Replace the `OWNER` placeholder** with the real GitHub org/user in four
-      places, before the repository is public: the CI badge in `README.md`,
-      `$id` in `schema/node.schema.json`, and the two links in
-      `.github/ISSUE_TEMPLATE/config.yml`.
+- [x] ~~Replace the `OWNER` placeholder~~ — done; the repository lives at
+      `SanTanBan/ProofGraph`.
 - [ ] **Two independent reviewers on all 8 theorems.** Every node moves to
       `reviewed` or gets an issue. This is the binding constraint and it is not
       glamorous.
@@ -129,6 +127,27 @@ Run alongside it, and much sooner — two days of work:
 **Falsified if:** agreement comes back below the pre-registered threshold, or the
 ablation shows no advantage. Both are in the kill criteria in
 [RISKS.md](RISKS.md).
+
+## Phase F — The formal track (runs in parallel with everything above)
+
+Added when the project pivoted to mechanistic extraction; see
+[FORMAL-TRACK.md](FORMAL-TRACK.md) for the full design. The Metamath pipeline
+(parse → verify → extract, no AI) is **built and tested**. What remains:
+
+- [ ] **Scale test on all of set.mm.** Run the extractor over the full ~48k
+      theorems, publish wall-clock time, failure list (should be empty), and
+      the corpus-wide reverse index. Fix what breaks.
+- [ ] **Cross-check against a canonical verifier.** Before any published claim
+      rests on our verifier, run `metamath.exe` or `mmverify.py` over the same
+      database and confirm agreement. Our verifier passing its own tests is
+      necessary, not sufficient.
+- [ ] **`leandojo-to-proofgraph` converter.** LeanDojo already extracts
+      tactic-level premises from mathlib; converting its traced format into
+      this repository's extracted-JSON puts `uses`/`why`/the viewer over
+      mathlib data. Integration, not invention — a weekend, not a thesis.
+- [ ] **The Rocq extractor** ([FORMAL-TRACK.md §4](FORMAL-TRACK.md)) — the
+      genuine greenfield. Needs a collaborator who knows `rocq-lsp`; this item
+      is the single most valuable thing an outside contributor could pick up.
 
 ## Phase 4 — The one contribution that might be real
 

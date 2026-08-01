@@ -1,0 +1,1032 @@
+{
+ "format": "proofgraph/extracted",
+ "version": 1,
+ "module": "metamath-set",
+ "source": "set.mm",
+ "nodes": [
+  {
+   "id": "idi",
+   "kind": "theorem",
+   "title": "idi",
+   "statement": "|- ph",
+   "hypotheses": [
+    "idi.1: |- ph"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "idi"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:idi.1"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a1ii",
+   "kind": "theorem",
+   "title": "a1ii",
+   "statement": "|- ph",
+   "hypotheses": [
+    "a1ii.1: |- ph",
+    "a1ii.2: |- ps"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "a1ii"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:a1ii.1"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wn",
+   "kind": "background",
+   "title": "Syntax: wn",
+   "statement": "wff -. ph",
+   "hypotheses": [],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "wn"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "wi",
+   "kind": "background",
+   "title": "Syntax: wi",
+   "statement": "wff ( ph -> ps )",
+   "hypotheses": [],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "wi"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "ax-mp",
+   "kind": "axiom",
+   "title": "ax-mp",
+   "statement": "|- ps",
+   "hypotheses": [
+    "min: |- ph",
+    "maj: |- ( ph -> ps )"
+   ],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "ax-mp"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "ax-1",
+   "kind": "axiom",
+   "title": "ax-1",
+   "statement": "|- ( ph -> ( ps -> ph ) )",
+   "hypotheses": [],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "ax-1"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "ax-2",
+   "kind": "axiom",
+   "title": "ax-2",
+   "statement": "|- ( ( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) ) )",
+   "hypotheses": [],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "ax-2"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "ax-3",
+   "kind": "axiom",
+   "title": "ax-3",
+   "statement": "|- ( ( -. ph -> -. ps ) -> ( ps -> ph ) )",
+   "hypotheses": [],
+   "context": [],
+   "status": "draft",
+   "formalization": {
+    "metamath": "ax-3"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+   },
+   "steps": []
+  },
+  {
+   "id": "mp2",
+   "kind": "theorem",
+   "title": "mp2",
+   "statement": "|- ch",
+   "hypotheses": [
+    "mp2.1: |- ph",
+    "mp2.2: |- ps",
+    "mp2.3: |- ( ph -> ( ps -> ch ) )"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mp2"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ps",
+     "by": [
+      "hyp:mp2.2"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ph",
+     "by": [
+      "hyp:mp2.1"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ph -> ( ps -> ch ) )",
+     "by": [
+      "hyp:mp2.3"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ps -> ch )",
+     "by": [
+      "s:2",
+      "s:3",
+      "ax-mp"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "5",
+     "claim": "|- ch",
+     "by": [
+      "s:1",
+      "s:4",
+      "ax-mp"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mp2b",
+   "kind": "theorem",
+   "title": "mp2b",
+   "statement": "|- ch",
+   "hypotheses": [
+    "mp2b.1: |- ph",
+    "mp2b.2: |- ( ph -> ps )",
+    "mp2b.3: |- ( ps -> ch )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mp2b"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:mp2b.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:mp2b.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ps",
+     "by": [
+      "s:1",
+      "s:2",
+      "ax-mp"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ps -> ch )",
+     "by": [
+      "hyp:mp2b.3"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "5",
+     "claim": "|- ch",
+     "by": [
+      "s:3",
+      "s:4",
+      "ax-mp"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a1i",
+   "kind": "theorem",
+   "title": "a1i",
+   "statement": "|- ( ps -> ph )",
+   "hypotheses": [
+    "a1i.1: |- ph"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "a1i"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:a1i.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ( ps -> ph ) )",
+     "by": [
+      "ax-1"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ps -> ph )",
+     "by": [
+      "s:1",
+      "s:2",
+      "ax-mp"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "2a1i",
+   "kind": "theorem",
+   "title": "2a1i",
+   "statement": "|- ( ps -> ( ch -> ph ) )",
+   "hypotheses": [
+    "2a1i.1: |- ph"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "2a1i"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:2a1i.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ch -> ph )",
+     "by": [
+      "s:1",
+      "a1i"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ps -> ( ch -> ph ) )",
+     "by": [
+      "s:2",
+      "a1i"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ax1w",
+   "kind": "theorem",
+   "title": "ax1w",
+   "statement": "|- ( ph -> ( ps -> ( ch -> ps ) ) )",
+   "hypotheses": [],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "ax1w"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ps -> ( ch -> ps ) )",
+     "by": [
+      "ax-1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ( ps -> ( ch -> ps ) ) )",
+     "by": [
+      "s:1",
+      "a1i"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mp1i",
+   "kind": "theorem",
+   "title": "mp1i",
+   "statement": "|- ( ch -> ps )",
+   "hypotheses": [
+    "mp1i.1: |- ph",
+    "mp1i.2: |- ( ph -> ps )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mp1i"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ph",
+     "by": [
+      "hyp:mp1i.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:mp1i.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ps",
+     "by": [
+      "s:1",
+      "s:2",
+      "ax-mp"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ch -> ps )",
+     "by": [
+      "s:3",
+      "a1i"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "a2i",
+   "kind": "theorem",
+   "title": "a2i",
+   "statement": "|- ( ( ph -> ps ) -> ( ph -> ch ) )",
+   "hypotheses": [
+    "a2i.1: |- ( ph -> ( ps -> ch ) )"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "a2i"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ( ps -> ch ) )",
+     "by": [
+      "hyp:a2i.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ( ph -> ( ps -> ch ) ) -> ( ( ph -> ps ) -> ( ph -> ch ) ) )",
+     "by": [
+      "ax-2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ( ph -> ps ) -> ( ph -> ch ) )",
+     "by": [
+      "s:1",
+      "s:2",
+      "ax-mp"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mpd",
+   "kind": "theorem",
+   "title": "mpd",
+   "statement": "|- ( ph -> ch )",
+   "hypotheses": [
+    "mpd.1: |- ( ph -> ps )",
+    "mpd.2: |- ( ph -> ( ps -> ch ) )"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mpd"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:mpd.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ( ps -> ch ) )",
+     "by": [
+      "hyp:mpd.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ( ph -> ps ) -> ( ph -> ch ) )",
+     "by": [
+      "s:2",
+      "a2i"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ph -> ch )",
+     "by": [
+      "s:1",
+      "s:3",
+      "ax-mp"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "imim2i",
+   "kind": "theorem",
+   "title": "imim2i",
+   "statement": "|- ( ( ch -> ph ) -> ( ch -> ps ) )",
+   "hypotheses": [
+    "imim2i.1: |- ( ph -> ps )"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "imim2i"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:imim2i.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ch -> ( ph -> ps ) )",
+     "by": [
+      "s:1",
+      "a1i"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ( ch -> ph ) -> ( ch -> ps ) )",
+     "by": [
+      "s:2",
+      "a2i"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "syl",
+   "kind": "theorem",
+   "title": "syl",
+   "statement": "|- ( ph -> ch )",
+   "hypotheses": [
+    "syl.1: |- ( ph -> ps )",
+    "syl.2: |- ( ps -> ch )"
+   ],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "syl"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:syl.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ps -> ch )",
+     "by": [
+      "hyp:syl.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ph -> ( ps -> ch ) )",
+     "by": [
+      "s:2",
+      "a1i"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ph -> ch )",
+     "by": [
+      "s:1",
+      "s:3",
+      "mpd"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3syl",
+   "kind": "theorem",
+   "title": "3syl",
+   "statement": "|- ( ph -> th )",
+   "hypotheses": [
+    "3syl.1: |- ( ph -> ps )",
+    "3syl.2: |- ( ps -> ch )",
+    "3syl.3: |- ( ch -> th )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "3syl"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:3syl.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ps -> ch )",
+     "by": [
+      "hyp:3syl.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ph -> ch )",
+     "by": [
+      "s:1",
+      "s:2",
+      "syl"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ch -> th )",
+     "by": [
+      "hyp:3syl.3"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "5",
+     "claim": "|- ( ph -> th )",
+     "by": [
+      "s:3",
+      "s:4",
+      "syl"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "4syl",
+   "kind": "theorem",
+   "title": "4syl",
+   "statement": "|- ( ph -> ta )",
+   "hypotheses": [
+    "4syl.1: |- ( ph -> ps )",
+    "4syl.2: |- ( ps -> ch )",
+    "4syl.3: |- ( ch -> th )",
+    "4syl.4: |- ( th -> ta )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "4syl"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:4syl.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ps -> ch )",
+     "by": [
+      "hyp:4syl.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ch -> th )",
+     "by": [
+      "hyp:4syl.3"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ph -> th )",
+     "by": [
+      "s:1",
+      "s:2",
+      "s:3",
+      "3syl"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "5",
+     "claim": "|- ( th -> ta )",
+     "by": [
+      "hyp:4syl.4"
+     ]
+    },
+    {
+     "n": 6,
+     "id": "6",
+     "claim": "|- ( ph -> ta )",
+     "by": [
+      "s:4",
+      "s:5",
+      "syl"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mpi",
+   "kind": "theorem",
+   "title": "mpi",
+   "statement": "|- ( ph -> ch )",
+   "hypotheses": [
+    "mpi.1: |- ps",
+    "mpi.2: |- ( ph -> ( ps -> ch ) )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mpi"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ps",
+     "by": [
+      "hyp:mpi.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "s:1",
+      "a1i"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ph -> ( ps -> ch ) )",
+     "by": [
+      "hyp:mpi.2"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ph -> ch )",
+     "by": [
+      "s:2",
+      "s:3",
+      "mpd"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mpisyl",
+   "kind": "theorem",
+   "title": "mpisyl",
+   "statement": "|- ( ph -> th )",
+   "hypotheses": [
+    "mpisyl.1: |- ( ph -> ps )",
+    "mpisyl.2: |- ch",
+    "mpisyl.3: |- ( ps -> ( ch -> th ) )"
+   ],
+   "context": [],
+   "status": "verified",
+   "formalization": {
+    "metamath": "mpisyl"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ps )",
+     "by": [
+      "hyp:mpisyl.1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ch",
+     "by": [
+      "hyp:mpisyl.2"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ps -> ( ch -> th ) )",
+     "by": [
+      "hyp:mpisyl.3"
+     ]
+    },
+    {
+     "n": 4,
+     "id": "4",
+     "claim": "|- ( ps -> th )",
+     "by": [
+      "s:2",
+      "s:3",
+      "mpi"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "5",
+     "claim": "|- ( ph -> th )",
+     "by": [
+      "s:1",
+      "s:4",
+      "syl"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "id",
+   "kind": "theorem",
+   "title": "id",
+   "statement": "|- ( ph -> ph )",
+   "hypotheses": [],
+   "context": [
+    "wi"
+   ],
+   "status": "verified",
+   "formalization": {
+    "metamath": "id"
+   },
+   "provenance": {
+    "source": "set.mm",
+    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "id": "1",
+     "claim": "|- ( ph -> ( ph -> ph ) )",
+     "by": [
+      "ax-1"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "2",
+     "claim": "|- ( ph -> ( ( ph -> ph ) -> ph ) )",
+     "by": [
+      "ax-1"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "3",
+     "claim": "|- ( ph -> ph )",
+     "by": [
+      "s:1",
+      "s:2",
+      "mpd"
+     ]
+    }
+   ]
+  }
+ ]
+}

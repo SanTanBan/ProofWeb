@@ -1,10 +1,10 @@
 blank_issues_enabled: true
 contact_links:
   - name: Read the specification first
-    url: https://github.com/OWNER/proofgraph/blob/main/docs/SPEC.md
+    url: https://github.com/SanTanBan/ProofGraph/blob/main/docs/SPEC.md
     about: What a node file means, and what the validator does and does not check.
   - name: Why this project might fail
-    url: https://github.com/OWNER/proofgraph/blob/main/docs/RISKS.md
+    url: https://github.com/SanTanBan/ProofGraph/blob/main/docs/RISKS.md
     about: >
       An adversarial review of the whole idea, kept in the repository on purpose.
       Read it before proposing something ambitious.

@@ -37,8 +37,15 @@ convention, and conventions are section 5.
 **Mitigation:** none that preserves the current scope. The two honest moves are
 (a) reposition the artefact as a *measurement of human provenance judgement*,
 where inter-annotator agreement is at least a well-defined quantity, or (b)
-derive edges from Lean elaboration — at which point LeanDojo already did it. See
-the scope recommendation at the end.
+derive edges from formal proofs, where the correctness criterion is the proof
+itself. See the scope recommendation at the end.
+
+**Status update:** the project has since done both. (a) is the Phase 3
+measurement study in [ROADMAP.md](ROADMAP.md); (b) is the formal track —
+[`proofgraph.metamath`](../tools/proofgraph/metamath.py) extracts edges only
+after replaying each proof through a verifier, so for extracted nodes this
+objection is answered. For hand-written YAML nodes it stands in full, which is
+why the two tracks are kept explicitly separate and labelled.
 
 ## 2. The artefact already exists, built mechanically, at 100–1000× the reachable scale
 

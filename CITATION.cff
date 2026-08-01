@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: >-
+  If you use ProofGraph — the tools, the node format, or the extracted
+  datasets — please cite it as below. The code is MIT-licensed and the
+  graph content is CC BY 4.0, so attribution is all that is asked.
+type: software
+title: "ProofGraph: a knowledge graph of mathematics whose edges are derived from proofs"
+authors:
+  - family-names: Banerjee
+    given-names: Santanu
+repository-code: "https://github.com/SanTanBan/ProofGraph"
+license: MIT
+keywords:
+  - knowledge graph
+  - formal mathematics
+  - metamath
+  - proof dependencies
+  - premise selection

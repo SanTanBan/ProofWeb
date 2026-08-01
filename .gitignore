@@ -13,6 +13,10 @@ venv/
 /dist/
 /site/build/
 
+# Downloaded corpora (set.mm is ~50 MB; fetch it, don't commit it)
+#   curl -L -o corpora/set.mm https://raw.githubusercontent.com/metamath/set.mm/develop/set.mm
+/corpora/
+
 # Editors / OS
 .vscode/
 .idea/
