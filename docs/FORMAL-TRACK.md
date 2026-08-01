@@ -111,6 +111,17 @@ the strongest one available — this verifier is young and is not
 `metamath.exe`. Before publishing any load-bearing claim derived from an
 extraction, cross-check the database against the canonical verifiers.
 
+Two provenance facts worth stating rather than discovering later. set.mm is
+**CC0 / public domain** (the repository LICENSE is the verbatim CC0 1.0 legal
+code), so extractions carry no restrictions beyond honesty. And "no AI" here
+describes *this pipeline*, not the corpus's history: set.mm's own contributor
+table includes OpenAI (some proofs in the database were machine-found, then
+kernel-checked and human-curated like everything else). The kernel does not
+care who found a proof, and neither does the extractor — but a project that
+advertises a no-AI pipeline should say precisely where that boundary is.
+Practical note: fetch set.mm from the **develop** branch; `master` is a stale
+2021 snapshot.
+
 ## 3. The Lean path (designed; needs a toolchain, not ideas)
 
 A Lean proof term is an `Expr` whose constant subterms name every lemma used,
@@ -165,16 +176,27 @@ Asked directly: once the graph exists, how does it help prove something new —
 an Erdős problem, a conjecture? Honestly, in four mechanisms, in decreasing
 order of evidence:
 
-**1. Premise selection — the proven one.** The way structured dependency data
-has *actually* contributed to new proofs for fifteen years: given a goal,
-rank the few dozen prior results most likely to prove it, and hand those to an
-automated prover. Isabelle's Sledgehammer is the existence proof (its
-mechanistic MePo relevance filter predates ML entirely; CoqHammer and Lean's
-ReProver are the same idea for the other provers, ReProver trained on exactly
-the step-level premise data this project extracts). This is the concrete sense
-in which a proof graph is *infrastructure for proving*: the edges are training
-and retrieval signal for the systems that close goals. The graph does not
-prove; it makes the prover's search space tractable.
+**1. Premise selection — the proven one, with the numbers.** The pipeline that
+has actually produced new machine proofs for fifteen years is: **mine** the
+dependency graph from checked proofs → **rank** candidate premises for a new
+goal → hand the pruned problem to an automated prover → **replay** the found
+proof in the kernel → feed the new lemma's edges back in. Isabelle's
+Sledgehammer is the existence proof, and its evaluations isolate exactly what
+the graph is worth, because its two selectors differ in precisely that: MePo
+ranks by symbol overlap and never touches the graph; MaSh/MeSh are *trained on
+the dependency graph* — a k-NN over "which premises did similar theorems'
+proofs actually use". On identical provers and budgets, cumulative over six
+large formalizations: **MePo alone 48.5% of goals; adding the graph-trained
+selectors, 66.1%** (Blanchette et al., *A Learning-Based Fact Selector for
+Isabelle/HOL*, JAR 2016 — which also found the graph-trained selector needs
+~4× fewer premises for its peak). CoqHammer reports 40.8% of Coq stdlib
+theorems push-button; MizAR proves ~40% of the Mizar library; Lean's ReProver
+(51.2% pass@1, vs 47.6% for the same model without retrieval) is trained on
+LeanDojo's step-level premise data — the same kind of data this project's
+extractor emits. That difference — mid-40s to mid-60s percent — is the
+measured value of the artefact this track builds. The graph does not prove;
+it makes the prover's search space tractable, and that is worth ~15–18
+percentage points of actually-closed goals.
 
 **2. Dependency-gap analysis.** Formalize an open problem's *statement* (this
 is how the [Erdős formalization effort](https://www.erdosproblems.com/) and

@@ -1,9 +1,11 @@
 # Call for collaboration
 
-**Short version:** there is a working, machine-checked pilot of 14 nodes and 52
-proof edges where every edge is derived from a specific step of a specific proof.
-It needs people to attack it. The most useful thing you can do is find a step
-that does not follow.
+**Short version:** two working artefacts need people to attack them. A
+hand-written pilot (14 nodes, 63 proof edges, every edge derived from a
+specific proof step) — the most useful thing you can do there is find a step
+that does not follow. And a mechanistic, no-AI Metamath extractor+verifier
+that replays real set.mm proofs before emitting kernel-backed step-level
+edges — the most useful thing you can do there is break the verifier.
 
 ---
 
@@ -88,7 +90,7 @@ has), a web frontend, or a rewrite in a faster language. See
 ## Getting started in five minutes
 
 ```bash
-git clone <repo-url> && cd proofgraph/tools
+git clone https://github.com/SanTanBan/ProofGraph && cd ProofGraph/tools
 pip install -r requirements.txt
 python -m proofgraph validate --strict
 python -m proofgraph why T6
@@ -100,15 +102,27 @@ edges that step created will light up. That interaction is the entire thesis of
 the project; if it does not seem interesting, this is not the project for you and
 that is a useful thing to learn in five minutes.
 
+Or try the formal track on real mathematics:
+
+```bash
+curl -L -o ../corpora/set.mm https://raw.githubusercontent.com/metamath/set.mm/develop/set.mm
+python -m proofgraph extract ../corpora/set.mm --stop-at id -o ../examples/setmm.json
+python -m proofgraph uses ax-mp --json ../examples/setmm.json
+```
+
 ## Honest status
 
-Fourteen nodes. One module. Elementary group theory that every algebra textbook
-contains — chosen deliberately, so that what is being tested is the *method*, not
-the mathematics. Zero nodes are `verified` because none has been checked by a
-proof assistant yet. One maintainer, who is not a mathematician by training.
+Informal track: fourteen hand-written nodes, one module of textbook group
+theory — chosen deliberately, so that what is being tested is the *method* —
+and zero of them reviewed yet by two independent humans.
 
-That is the whole state of the project. Anyone telling you it is more than that
-is selling something.
+Formal track: a working Metamath parser+verifier+extractor (no AI in the
+pipeline; 63 tests; the opening of real set.mm replays with zero failures).
+Lean and Rocq are designs in [FORMAL-TRACK.md](FORMAL-TRACK.md), not code.
+
+One maintainer, who is not a mathematician by training. That is the whole
+state of the project. Anyone telling you it is more than that is selling
+something.
 
 ---
 
@@ -120,9 +134,13 @@ is selling something.
 > citations and remember which step produced them. So the edge isn't "T6 uses
 > T4" — it's "step 12 of T6 is where uniqueness of inverses enters."
 >
-> There is a working pilot: 14 nodes, 52 proof edges, elementary group theory,
-> machine-validated in CI, plus a single-file interactive viewer where clicking a
-> proof step lights up exactly the edges it created.
+> There are two working pieces. A hand-written pilot — 14 nodes, 63 proof
+> edges, elementary group theory, machine-validated in CI, with a single-file
+> interactive viewer where clicking a proof step lights up exactly the edges it
+> created. And a mechanistic (no-AI) Metamath extractor with a built-in
+> verifier: it replays real set.mm proofs — substitution, stack discipline, $d
+> checks — and emits kernel-backed step-level edges, plus the reverse query
+> nobody serves: every proof step in the corpus that invokes a given theorem.
 >
 > Important caveat I want to state up front, because the field is crowded and I
 > would rather be corrected early than late: **this is not a new idea.** Metamath
@@ -140,7 +158,7 @@ is selling something.
 > mathlib, or has an opinion about stable addressing in versioned documents. The
 > single most useful contribution is finding a proof step that does not follow.
 >
-> Repository: <url> · Start with docs/PRIOR-ART.md and docs/RISKS.md.
+> Repository: https://github.com/SanTanBan/ProofGraph · Start with docs/PRIOR-ART.md and docs/RISKS.md.
 
 Post it where formal-methods people actually are — the
 [Lean Zulip](https://leanprover.zulipchat.com/), the
