@@ -91,25 +91,33 @@ def tokens(text: str) -> Iterator[str]:
 class _Frame:
     v: set[Sym] = field(default_factory=set)
     d: set[frozenset[Sym]] = field(default_factory=set)
-    f: list[tuple[str, Sym, Sym]] = field(default_factory=list)   # (label, typecode, var)
-    e: list[tuple[str, Stmt]] = field(default_factory=list)       # (label, stmt)
+    # (declaration sequence number, label, ...) — the sequence number exists
+    # because mandatory hypotheses are ordered by DECLARATION, and $f and $e
+    # may interleave. set.mm happens never to declare an $f after an $e, so an
+    # implementation that assumes "all $f first" passes set.mm and silently
+    # mis-verifies a database that interleaves. Spec first, corpus second.
+    f: list[tuple[int, str, Sym, Sym]] = field(default_factory=list)
+    e: list[tuple[int, str, Stmt]] = field(default_factory=list)
+
+
+#: One mandatory hypothesis: ("f", label, typecode, var) or ("e", label, stmt).
+MandHyp = tuple
 
 
 @dataclass(frozen=True)
 class Assertion:
     """A ``$a`` or ``$p`` with the frame it was declared under.
 
-    ``f_hyps`` and ``e_hyps`` are the *mandatory* hypotheses in declaration
-    order — the exact things a proof of a using theorem must supply, in the
-    exact order it must supply them. ``dvs`` are the disjoint-variable pairs
-    among mandatory variables.
+    ``mandatory`` is the full list of mandatory hypotheses **in declaration
+    order** — exactly what a proof of a using theorem must supply, in exactly
+    that order (the compressed-proof numbering depends on it too). ``dvs`` are
+    the disjoint-variable pairs among mandatory variables.
     """
 
     label: str
     kind: str                                  # '$a' | '$p'
     stmt: Stmt
-    f_hyps: tuple[tuple[str, Sym, Sym], ...]
-    e_hyps: tuple[tuple[str, Stmt], ...]
+    mandatory: tuple[MandHyp, ...]
     dvs: frozenset[frozenset[Sym]]
 
     @property
@@ -122,7 +130,15 @@ class Assertion:
 
     @property
     def n_mandatory(self) -> int:
-        return len(self.f_hyps) + len(self.e_hyps)
+        return len(self.mandatory)
+
+    @property
+    def f_hyps(self) -> list[tuple[str, Sym, Sym]]:
+        return [(h[1], h[2], h[3]) for h in self.mandatory if h[0] == "f"]
+
+    @property
+    def e_hyps(self) -> list[tuple[str, Stmt]]:
+        return [(h[1], h[2]) for h in self.mandatory if h[0] == "e"]
 
 
 @dataclass(frozen=True)
@@ -165,7 +181,11 @@ class Database:
     and local ``$d`` restrictions come out right without snapshotting frames.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, keep_steps: bool = True) -> None:
+        #: keep_steps=False verifies everything but discards the replay logs —
+        #: a whole-set.mm verification pass holds tens of millions of step
+        #: records otherwise, and a scale test only needs the verdicts.
+        self.keep_steps = keep_steps
         self.constants: set[Sym] = set()
         self.variables_ever: set[Sym] = set()
         self.assertions: dict[str, Assertion] = {}
@@ -174,6 +194,7 @@ class Database:
         self.failures: dict[str, str] = {}              # label -> why it did not verify
         self._frames: list[_Frame] = [_Frame()]
         self._hyps: dict[str, tuple[str, Stmt]] = {}    # label -> ('f'|'e', stmt)
+        self._seq = 0                                   # hypothesis declaration order
 
     # -- scope helpers ------------------------------------------------------
 
@@ -183,23 +204,33 @@ class Database:
     def _active_dvs(self) -> set[frozenset[Sym]]:
         return set().union(*(fr.d for fr in self._frames))
 
-    def _active_f(self) -> list[tuple[str, Sym, Sym]]:
+    def _active_f(self) -> list[tuple[int, str, Sym, Sym]]:
         return [h for fr in self._frames for h in fr.f]
 
-    def _active_e(self) -> list[tuple[str, Stmt]]:
+    def _active_e(self) -> list[tuple[int, str, Stmt]]:
         return [h for fr in self._frames for h in fr.e]
 
     def _make_assertion(self, label: str, kind: str, stmt: Stmt) -> Assertion:
-        e_hyps = tuple(self._active_e())
-        mand_vars = {t for hyp in ([s for _, s in e_hyps] + [stmt]) for t in hyp
+        e_active = self._active_e()
+        mand_vars = {t for hyp in ([s for _, _, s in e_active] + [stmt]) for t in hyp
                      if t in self.variables_ever and t in self._active_vars()}
-        f_hyps = tuple(h for h in self._active_f() if h[2] in mand_vars)
-        declared = {h[2] for h in f_hyps}
+        f_mand = [h for h in self._active_f() if h[3] in mand_vars]
+        declared = {h[3] for h in f_mand}
         missing = mand_vars - declared
         if missing:
             raise MMError(f"{label}: variable(s) {sorted(missing)} have no active $f")
+
+        # Declaration order, with $f and $e interleaved as they were declared.
+        merged = sorted(
+            [("f", seq, lbl, tc, var) for seq, lbl, tc, var in f_mand]
+            + [("e", seq, lbl, s) for seq, lbl, s in e_active],
+            key=lambda h: h[1])
+        mandatory = tuple(
+            ("f", h[2], h[3], h[4]) if h[0] == "f" else ("e", h[2], h[3])
+            for h in merged)
+
         dvs = frozenset(p for p in self._active_dvs() if p <= mand_vars)
-        return Assertion(label, kind, stmt, f_hyps, e_hyps, dvs)
+        return Assertion(label, kind, stmt, mandatory, dvs)
 
     # -- parsing ------------------------------------------------------------
 
@@ -231,9 +262,9 @@ class Database:
                 if len(self._frames) == 1:
                     raise MMError("unmatched $}")
                 closing = self._frames.pop()
-                for lbl, *_ in closing.f:
+                for _, lbl, *_rest in closing.f:
                     self._hyps.pop(lbl, None)
-                for lbl, _ in closing.e:
+                for _, lbl, _stmt in closing.e:
                     self._hyps.pop(lbl, None)
             elif tok == "$c":
                 for sym in read_until("$."):
@@ -259,11 +290,13 @@ class Database:
                     if len(body) != 2:
                         raise MMError(f"{label}: $f must be 'typecode var'")
                     tc, var = body
-                    self._frames[-1].f.append((label, tc, var))
+                    self._seq += 1
+                    self._frames[-1].f.append((self._seq, label, tc, var))
                     self._hyps[label] = ("f", (tc, var))
                 elif tok == "$e":
                     body = tuple(read_until("$."))
-                    self._frames[-1].e.append((label, body))
+                    self._seq += 1
+                    self._frames[-1].e.append((self._seq, label, body))
                     self._hyps[label] = ("e", body)
                 elif tok == "$a":
                     stmt = tuple(read_until("$."))
@@ -325,7 +358,7 @@ class Database:
         if "?" in letters:
             raise MMIncompleteProof(assertion.label)
 
-        mand = [lbl for lbl, *_ in assertion.f_hyps] + [lbl for lbl, _ in assertion.e_hyps]
+        mand = [h[1] for h in assertion.mandatory]     # declaration order
         m, n = len(mand), len(listed)
 
         out: list[str | int] = []
@@ -425,13 +458,24 @@ class Database:
             del stack[len(stack) - npop:]
             del prov[len(prov) - npop:]
 
+            # Two passes over the popped entries, aligned with the mandatory
+            # hypotheses in declaration order. All $f slots must be processed
+            # before any $e slot is checked: an $e may precede an $f whose
+            # variable it does not use, so checking in a single pass would
+            # test the $e against an incomplete substitution.
             sub: dict[Sym, Stmt] = {}
-            for (_, tc, var), entry in zip(ref.f_hyps, popped):
+            for hyp, entry in zip(ref.mandatory, popped):
+                if hyp[0] != "f":
+                    continue
+                _, _, tc, var = hyp
                 if not entry or entry[0] != tc:
                     raise MMError(f"{assertion.label}: applying {item}, expected "
                                   f"typecode {tc}, got {' '.join(entry) or '<empty>'}")
                 sub[var] = entry[1:]
-            for (lbl, stmt), entry in zip(ref.e_hyps, popped[len(ref.f_hyps):]):
+            for hyp, entry in zip(ref.mandatory, popped):
+                if hyp[0] != "e":
+                    continue
+                _, lbl, stmt = hyp
                 if self._subst(stmt, sub) != entry:
                     raise MMError(
                         f"{assertion.label}: applying {item}, hypothesis {lbl} "
@@ -456,9 +500,11 @@ class Database:
                                 f"{assertion.label}: applying {item} needs "
                                 f"$d {u} {v}, which is not in scope")
 
-            args = tuple(popped_prov[len(ref.f_hyps):])   # $e provenance only:
-            # $f slots carry grammar, and a dependency argument is about the
-            # logical premises, not about how their wffs were spelled.
+            # $e provenance only, in declaration order: $f slots carry grammar,
+            # and a dependency argument is about the logical premises, not
+            # about how their wffs were spelled.
+            args = tuple(p for hyp, p in zip(ref.mandatory, popped_prov)
+                         if hyp[0] == "e")
             push(StepRecord(len(steps), "apply", item,
                             self._subst(ref.stmt, sub), args))
 
@@ -469,7 +515,9 @@ class Database:
             raise MMError(f"{assertion.label}: proof concludes "
                           f"{' '.join(stack[0])}, statement says "
                           f"{' '.join(assertion.stmt)}")
-        return VerifiedProof(assertion.label, tuple(steps), stack[0])
+        return VerifiedProof(assertion.label,
+                             tuple(steps) if self.keep_steps else (),
+                             stack[0])
 
 
 # ---------------------------------------------------------------------------
@@ -505,6 +553,10 @@ def extract(db: Database, *, module: str, source: str) -> list[Node]:
     - A node is ``verified`` only if the proof replayed through the verifier.
       An unverified node (incomplete proof) stays ``draft`` and says why.
     """
+    if not db.keep_steps:
+        raise MMError("extract() needs a database parsed with keep_steps=True; "
+                      "a keep_steps=False parse is a verification pass only")
+
     nodes: list[Node] = []
     for label in db.order:
         a = db.assertions[label]

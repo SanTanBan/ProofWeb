@@ -174,6 +174,55 @@ def test_file_inclusion_is_rejected_not_ignored():
         Database().parse("$[ other.mm $]")
 
 
+def test_mandatory_hypotheses_interleave_in_declaration_order():
+    """The spec orders mandatory hypotheses by declaration, and $e may precede
+    an $f it does not use. set.mm never does this, which is exactly why a
+    verifier that assumes 'all $f first' passes set.mm and silently
+    mis-verifies a database that interleaves. Both encodings are exercised:
+    the uncompressed proof supplies hypotheses in the true declaration order
+    (wp, prem, wq), and the compressed numbering must map 1->wp, 2->prem,
+    3->wq the same way."""
+    interleaved = """
+$c ( ) -> wff |- $.
+$v p q $.
+wp $f wff p $.
+wq $f wff q $.
+wi $a wff ( p -> q ) $.
+${
+  prem $e |- p $.
+  $v r $.
+  wr $f wff r $.
+  axi $a |- ( r -> p ) $.
+$}
+${
+  use.1 $e |- p $.
+  use $p |- ( ( p -> p ) -> p ) $= wp use.1 wp wp wi axi $.
+$}
+${
+  usec.1 $e |- p $.
+  usec $p |- ( ( p -> p ) -> p ) $= ( wi axi ) ABAACD $.
+$}
+"""
+    d = Database()
+    d.parse(interleaved)
+    assert [h[0] for h in d.assertions["axi"].mandatory] == ["f", "e", "f"], \
+        "mandatory order must be declaration order, not f-then-e"
+    assert set(d.proofs) == {"use", "usec"}
+    assert d.proofs["use"].conclusion == d.proofs["usec"].conclusion
+
+
+def test_verification_pass_without_step_retention():
+    """keep_steps=False verifies everything and retains no replay logs —
+    the mode a whole-set.mm scale test runs in. Extraction must refuse it
+    rather than silently emit stepless 'verified' theorems."""
+    d = Database(keep_steps=False)
+    d.parse(FIXTURE)
+    assert set(d.proofs) == {"a1i", "a1ic", "a1iz", "id"}
+    assert all(p.steps == () for p in d.proofs.values())
+    with pytest.raises(MMError, match="keep_steps"):
+        extract(d, module="m", source="s")
+
+
 # ---------------------------------------------------------------------------
 # extraction
 # ---------------------------------------------------------------------------

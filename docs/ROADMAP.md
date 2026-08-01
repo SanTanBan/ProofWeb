@@ -134,13 +134,15 @@ Added when the project pivoted to mechanistic extraction; see
 [FORMAL-TRACK.md](FORMAL-TRACK.md) for the full design. The Metamath pipeline
 (parse → verify → extract, no AI) is **built and tested**. What remains:
 
-- [ ] **Scale test on all of set.mm.** Run the extractor over the full ~48k
-      theorems, publish wall-clock time, failure list (should be empty), and
-      the corpus-wide reverse index. Fix what breaks.
-- [ ] **Cross-check against a canonical verifier.** Before any published claim
-      rests on our verifier, run `metamath.exe` or `mmverify.py` over the same
-      database and confirm agreement. Our verifier passing its own tests is
-      necessary, not sufficient.
+- [x] **Scale test on all of set.mm.** Done: 47,588/47,588 proofs verified in
+      39.1 s wall clock, zero failures (Python 3.12, single core, replay logs
+      off). What remains of this item: publish the corpus-wide reverse index
+      as an artefact rather than a CLI query.
+- [x] **Cross-check against a canonical verifier** — `mmverify.py` over the
+      same develop snapshot: 47,588 verified, "No errors were found", exact
+      count agreement. Still worth repeating with `metamath.exe`/`smm3` before
+      any *published* claim rests on an extraction, and worth automating in a
+      scheduled CI job.
 - [ ] **`leandojo-to-proofgraph` converter.** LeanDojo already extracts
       tactic-level premises from mathlib; converting its traced format into
       this repository's extracted-JSON puts `uses`/`why`/the viewer over

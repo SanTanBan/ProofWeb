@@ -95,15 +95,17 @@ python -m proofgraph why mp2 --json examples/setmm-through-id.json
 python -m proofgraph uses ax-mp --json examples/setmm-through-id.json
 ```
 
-**Evidence, from this repository's own runs.** The first 60 theorems of the
-real set.mm verified 60/60 with zero failures in 0.8 s; the first 1,000 in
-1.0 s. The extracted proof of set.mm's `id` matches the Metamath Proof
-Explorer page for it step for step. And one more result worth recording: the
-first hand-written proof in the test fixture — written carefully, on paper,
-by the person building the verifier — **was wrong** (a misinstantiated
-`ax-1`), and the verifier refused it. The error rate of careful humans is the
-project's founding observation, and it reproduced itself at the first
-opportunity.
+**Evidence, from this repository's own runs.** The full set.mm — **all 47,588
+proofs, ~51 MB, 873k lines** — parses and verifies in **39.1 s wall clock with
+zero failures** (Python 3.12, single core, `keep_steps=False`). That count and
+verdict agree exactly with the canonical `mmverify.py` run over the same
+develop-branch snapshot (47,588 verified, "No errors were found"). The
+extracted proof of set.mm's `id` matches the Metamath Proof Explorer page for
+it step for step. And one more result worth recording: the first hand-written
+proof in the test fixture — written carefully, on paper, by the person
+building the verifier — **was wrong** (a misinstantiated `ax-1`), and the
+verifier refused it. The error rate of careful humans is the project's
+founding observation, and it reproduced itself at the first opportunity.
 
 **Trust statement.** An extracted edge means: *this Python verifier replayed
 the proof from axioms and it checked*. That is a strong claim and still not
@@ -127,8 +129,15 @@ Practical note: fetch set.mm from the **develop** branch; `master` is a stale
 A Lean proof term is an `Expr` whose constant subterms name every lemma used,
 at a specific structural position. The mechanistic extractor is therefore a
 metaprogram, not a parser: iterate `Environment.constants`, and for each
-theorem walk its value with an `Expr` traversal collecting used constants
-(`Lean.Expr` folds; positions recoverable during traversal). No AI anywhere.
+`thmInfo`/`defnInfo` walk its `value` with an `Expr` traversal collecting used
+constants — `Lean.Util.FoldConsts` (`getUsedConstants`) does the collection
+today, though it discards positions, so a positional variant is a small custom
+fold emitting `SubExpr.Pos` paths. One boundary to know before designing
+around it: those positions are *structural* (paths within the term). Kernel
+`Expr`s carry no source ranges — sub-declaration *source-text* positions
+require `InfoTree`s, which only exist while re-running the elaborator over the
+source. That is precisely the line between term-level and tactic-level
+extraction. No AI anywhere.
 
 Two granularities exist and they are genuinely different:
 
@@ -157,18 +166,29 @@ substrate has just shifted — SerAPI is discontinued; `coq-lsp`/`rocq-lsp` is
 the successor — so there is no legacy incumbent to displace.
 
 The design, for someone who knows the Rocq internals (this is the single most
-valuable contribution an outside collaborator could make):
+valuable contribution an outside collaborator could make). One fact narrows it
+considerably, verified against the interfaces rather than assumed:
+**`rocq-lsp`'s machine API (Petanque) does not expose kernel proof terms.**
+Its `premises` call lists what is *available* in the environment, not what a
+proof *used*; `goals` returns reified strings; `ast` returns surface syntax.
+The proof terms exist — `constant_body` in `kernel/declarations.mli`, with
+`Qed`-opaque terms lazily loadable from the `.vo` opaque segment
+(`kernel/opaqueproof.mli`) — but reaching them means OCaml, not JSON-RPC.
 
-1. Drive `rocq-lsp` over a `.v` file; after each sentence, request the proof
-   state; on `Qed`, obtain the kernel term of the completed proof.
-2. Walk the term for constants (the analogue of the Lean traversal); attribute
-   them to sentences via the elaboration spans `coq-lsp` tracks.
-3. Emit the same extracted-JSON this repository already loads, viewers and
-   queries included.
+So the honest architecture is two components:
 
-Deliverable 1 is `rocq-lsp`-shaped engineering, not theory. Even a
-*whole-proof* extractor for the Rocq stdlib — skipping step attribution in
-version one — would be the first of its kind and immediately useful.
+1. **An OCaml plugin against the Rocq API** (`Global.env`, `constant_body`,
+   forcing the opaque table): walk each constant's term for the constants it
+   uses — the exact analogue of Lean's `getUsedConstants` — and dump
+   whole-proof dependency JSON. This alone, run over the Rocq stdlib, would be
+   the first artefact of its kind.
+2. **Sentence attribution via `rocq-lsp`/Petanque** on top: replay the `.v`
+   source, diff the goal state across sentences, and join against the plugin's
+   term data to attribute premises to proof steps. This is the LeanDojo
+   analogue and is genuinely harder; it is version two, not version one.
+
+Emit the same extracted-JSON this repository already loads, and the viewers
+and queries come for free.
 
 ## 5. After construction: how a ProofGraph helps attack open problems
 

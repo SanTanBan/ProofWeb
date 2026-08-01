@@ -53,9 +53,10 @@ proofs by [`proofgraph.metamath`](tools/proofgraph/metamath.py): a pure-Python
 Metamath parser, compressed-proof decoder and **verifier** that replays every
 proof — substitution, stack discipline, disjoint-variable conditions — before
 emitting a single edge. An extracted edge is a fact about a checked proof, not
-anyone's opinion. Verified against the real set.mm: first 1,000 theorems replay
-in ~1 second, zero failures. The Lean and Rocq paths are designed in
-[docs/FORMAL-TRACK.md](docs/FORMAL-TRACK.md).
+anyone's opinion. Scale-tested against the real thing: **all 47,588 proofs of
+set.mm verify in 39 seconds, zero failures**, matching the canonical
+`mmverify.py` verdict on the same snapshot. The Lean and Rocq paths are
+designed in [docs/FORMAL-TRACK.md](docs/FORMAL-TRACK.md).
 
 **The informal track (human, reviewed).** The YAML format under `graph/` for
 mathematics that has *no* formal proof yet — where step-level provenance is a
