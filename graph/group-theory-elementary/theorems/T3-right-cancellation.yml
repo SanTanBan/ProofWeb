@@ -56,6 +56,6 @@ formalization:
   lean: mul_right_cancel
 provenance:
   source: 'Standard; any first course in algebra.'
-  contributed_by: 'ProofGraph pilot'
+  contributed_by: 'ProofWeb pilot'
   assisted_by: 'Claude (drafted), human review pending'
 tags: [cancellation]

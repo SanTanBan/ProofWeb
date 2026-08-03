@@ -165,7 +165,7 @@ Verified gaps, roughly in order of how defensible they are:
 
 ---
 
-## What this means for ProofGraph
+## What this means for ProofWeb
 
 Three conclusions, stated plainly because the alternative is wasting people's
 time:

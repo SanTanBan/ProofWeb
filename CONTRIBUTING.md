@@ -65,10 +65,10 @@ In rough order of value:
 5. Run the checks:
 
 ```bash
-cd tools && python -m proofgraph validate --strict && python -m pytest
+cd tools && python -m proofweb validate --strict && python -m pytest
 ```
 
-6. Read your own node back with `python -m proofgraph why <id>` and see whether
+6. Read your own node back with `python -m proofweb why <id>` and see whether
    the dependency list it prints matches what you believe.
 7. Open a pull request. Say in the description which steps you are least sure
    about — a PR that flags its own weak points gets reviewed faster and better.

@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "proofgraph"
+name = "proofweb"
 version = "0.1.0"
 description = "A knowledge graph of mathematics whose edges are derived from proofs, not declared by hand."
 readme = "../README.md"
@@ -18,10 +18,10 @@ dependencies = [
 dev = ["pytest>=7.0"]
 
 [project.scripts]
-proofgraph = "proofgraph.cli:main"
+proofweb = "proofweb.cli:main"
 
 [tool.setuptools]
-packages = ["proofgraph"]
+packages = ["proofweb"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

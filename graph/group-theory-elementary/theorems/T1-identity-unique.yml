@@ -48,7 +48,7 @@ formalization:
   metamath: grpideu
 provenance:
   source: 'Standard; any first course in algebra.'
-  contributed_by: 'ProofGraph pilot'
+  contributed_by: 'ProofWeb pilot'
   assisted_by: 'Claude (drafted); citation defects found in adversarial review, corrected'
   note: >
     No single mathlib declaration states this. In mathlib the identity is a field of

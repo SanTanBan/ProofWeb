@@ -17,7 +17,7 @@ derived from proofs rather than declared alongside them**.
 A node declares a proof. Each step carries its own justifications. Edges come
 from those justifications and remember which step created them. So `T6 → T4` is
 not a fact about two theorems — it is the fact that *step 12 of T6* is where
-uniqueness of inverses is used, and `proofgraph why T6` will tell you that.
+uniqueness of inverses is used, and `proofweb why T6` will tell you that.
 
 The consequence that matters: you cannot cite a lemma you did not use, and you
 cannot use one without the edge appearing. The graph is falsifiable. CI fails
@@ -90,14 +90,14 @@ has), a web frontend, or a rewrite in a faster language. See
 ## Getting started in five minutes
 
 ```bash
-git clone https://github.com/SanTanBan/ProofGraph && cd ProofGraph/tools
+git clone https://github.com/SanTanBan/ProofWeb && cd ProofWeb/tools
 pip install -r requirements.txt
-python -m proofgraph validate --strict
-python -m proofgraph why T6
-python -m proofgraph render html -o ../build/proofgraph.html
+python -m proofweb validate --strict
+python -m proofweb why T6
+python -m proofweb render html -o ../build/proofweb.html
 ```
 
-Then open `build/proofgraph.html`, click node T6, and click step 12. Exactly the
+Then open `build/proofweb.html`, click node T6, and click step 12. Exactly the
 edges that step created will light up. That interaction is the entire thesis of
 the project; if it does not seem interesting, this is not the project for you and
 that is a useful thing to learn in five minutes.
@@ -106,8 +106,8 @@ Or try the formal track on real mathematics:
 
 ```bash
 curl -L -o ../corpora/set.mm https://raw.githubusercontent.com/metamath/set.mm/develop/set.mm
-python -m proofgraph extract ../corpora/set.mm --stop-at id -o ../examples/setmm.json
-python -m proofgraph uses ax-mp --json ../examples/setmm.json
+python -m proofweb extract ../corpora/set.mm --stop-at id -o ../examples/setmm.json
+python -m proofweb uses ax-mp --json ../examples/setmm.json
 ```
 
 ## Honest status
@@ -128,7 +128,7 @@ something.
 
 ## A short post, if you want to share this
 
-> I have been building **ProofGraph**: a format for writing mathematics where a
+> I have been building **ProofWeb**: a format for writing mathematics where a
 > proof's dependencies are *derived from its steps* rather than listed beside
 > them. Each step cites what justifies it; the graph edges come from those
 > citations and remember which step produced them. So the edge isn't "T6 uses
@@ -158,7 +158,7 @@ something.
 > mathlib, or has an opinion about stable addressing in versioned documents. The
 > single most useful contribution is finding a proof step that does not follow.
 >
-> Repository: https://github.com/SanTanBan/ProofGraph · Start with docs/PRIOR-ART.md and docs/RISKS.md.
+> Repository: https://github.com/SanTanBan/ProofWeb · Start with docs/PRIOR-ART.md and docs/RISKS.md.
 
 Post it where formal-methods people actually are — the
 [Lean Zulip](https://leanprover.zulipchat.com/), the

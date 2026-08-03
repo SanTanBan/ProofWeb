@@ -9,14 +9,14 @@ that accepts everything extracts a graph worth nothing.
 from __future__ import annotations
 
 import pytest
-from proofgraph.metamath import (
+from proofweb.metamath import (
     Database,
     MMError,
     extract,
     nodes_from_json,
     nodes_to_json,
 )
-from proofgraph.model import Graph
+from proofweb.model import Graph
 
 # A minimal propositional system: implication, ax-1, ax-2, modus ponens.
 # Deliberately tiny and deliberately standard — it is the opening of set.mm

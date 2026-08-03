@@ -521,7 +521,7 @@ class Database:
 
 
 # ---------------------------------------------------------------------------
-# extraction into ProofGraph nodes
+# extraction into ProofWeb nodes
 # ---------------------------------------------------------------------------
 
 
@@ -540,7 +540,7 @@ def _title(a: Assertion) -> str:
 
 
 def extract(db: Database, *, module: str, source: str) -> list[Node]:
-    """Turn a parsed+verified database into ProofGraph nodes.
+    """Turn a parsed+verified database into ProofWeb nodes.
 
     The mapping, and the reasoning behind each choice:
 
@@ -570,7 +570,7 @@ def extract(db: Database, *, module: str, source: str) -> list[Node]:
         status = "draft"
         provenance: dict[str, object] = {
             "source": source,
-            "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
+            "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
         }
 
         if a.kind == "$p":
@@ -602,7 +602,7 @@ def extract(db: Database, *, module: str, source: str) -> list[Node]:
                 context = tuple(sorted(syntax_used))
                 status = "verified"
                 provenance["note"] = (
-                    "proof replayed and checked by proofgraph's Metamath "
+                    "proof replayed and checked by proofweb's Metamath "
                     "verifier (substitution, stack discipline, $d conditions)")
 
         nodes.append(Node(
@@ -633,7 +633,7 @@ def extract(db: Database, *, module: str, source: str) -> list[Node]:
 
 def nodes_to_json(nodes: Iterable[Node], *, module: str, source: str) -> dict:
     return {
-        "format": "proofgraph/extracted",
+        "format": "proofweb/extracted",
         "version": 1,
         "module": module,
         "source": source,
@@ -657,8 +657,8 @@ def nodes_to_json(nodes: Iterable[Node], *, module: str, source: str) -> dict:
 
 
 def nodes_from_json(data: dict) -> list[Node]:
-    if data.get("format") != "proofgraph/extracted":
-        raise MMError("not a proofgraph/extracted JSON document")
+    if data.get("format") != "proofweb/extracted":
+        raise MMError("not a proofweb/extracted JSON document")
     module = data.get("module", "extracted")
     source = data.get("source", "")
     out: list[Node] = []

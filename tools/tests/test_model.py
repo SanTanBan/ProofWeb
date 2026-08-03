@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from proofgraph.model import Graph, Node, Step, classify_token
+from proofweb.model import Graph, Node, Step, classify_token
 
 
 def test_local_tokens_do_not_become_edges():

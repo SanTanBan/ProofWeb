@@ -1,4 +1,4 @@
-# Runtime dependencies for the proofgraph tools.
+# Runtime dependencies for the proofweb tools.
 # Deliberately tiny: the graph is plain YAML, and it should stay readable and
 # checkable without a heavy stack. Anything added here needs a reason in the PR.
 PyYAML>=6.0

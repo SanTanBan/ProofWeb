@@ -32,6 +32,6 @@ formalization:
   lean: inv_eq_of_mul_eq_one_right
 provenance:
   source: 'Standard; any first course in algebra.'
-  contributed_by: 'ProofGraph pilot'
+  contributed_by: 'ProofWeb pilot'
   assisted_by: 'Claude (drafted), human review pending'
 tags: [inverse, uniqueness]

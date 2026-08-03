@@ -42,7 +42,7 @@ itself. See the scope recommendation at the end.
 
 **Status update:** the project has since done both. (a) is the Phase 3
 measurement study in [ROADMAP.md](ROADMAP.md); (b) is the formal track —
-[`proofgraph.metamath`](../tools/proofgraph/metamath.py) extracts edges only
+[`proofweb.metamath`](../tools/proofweb/metamath.py) extracts edges only
 after replaying each proof through a verifier, so for extracted nodes this
 objection is answered. For hand-written YAML nodes it stands in full, which is
 why the two tracks are kept explicitly separate and labelled.
@@ -61,7 +61,7 @@ step-level premise annotations. Metamath has done this since the 1990s.
 
 **Mitigation — and this one is concrete and cheap:** run the ablation and publish
 it whichever way it comes out. Frontier model + web search, versus frontier model
-+ ProofGraph, on step-level attribution for 30 blind steps, judged by a third
++ ProofWeb, on step-level attribution for 30 blind steps, judged by a third
 party. Two days of work. If the graph does not beat plain retrieval by a wide
 margin, the project is finished and should say so.
 
@@ -72,7 +72,7 @@ margin, the project is finished and should say so.
 This is measured rather than argued, which is why it belongs high.
 
 The pilot is eight proofs from first-year algebra, written carefully, and
-`proofgraph validate --strict` reported **"ok — 14 nodes, 52 proof edges, no
+`proofweb validate --strict` reported **"ok — 14 nodes, 52 proof edges, no
 findings."** An adversarial review of the same files then found:
 
 - **5 blocking defects** — three steps that did not follow from what they cited
@@ -176,7 +176,7 @@ grants fund tokens and the bottleneck is expert hours.
 
 **Mitigation, small but real:** get exactly one node to `verified` against a
 checked Lean artefact before asking anyone for anything, and make
-`proofgraph stats` print reviewed/total on every run so the zero is impossible to
+`proofweb stats` print reviewed/total on every run so the zero is impossible to
 look away from.
 
 ## 8. <a id="overclaiming"></a>Overclaiming — and the public surface currently contradicts the repository

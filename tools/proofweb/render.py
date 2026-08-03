@@ -27,7 +27,7 @@ def _label(node: Node) -> str:
 def to_dot(graph: Graph, include_vocabulary: bool = True) -> str:
     """Graphviz. ``dot -Tsvg graph.dot -o graph.svg``."""
     lines = [
-        "digraph proofgraph {",
+        "digraph proofweb {",
         "  rankdir=BT;",
         '  node [fontname="Helvetica", fontsize=10, style=filled, fillcolor="#f8fafc"];',
         '  edge [fontname="Helvetica", fontsize=8, color="#94a3b8"];',

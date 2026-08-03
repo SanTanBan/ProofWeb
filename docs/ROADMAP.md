@@ -34,7 +34,7 @@ three things nobody has done, in order of how cheaply they can be falsified.
 The pilot must survive contact with people who know more than its authors.
 
 - [x] ~~Replace the `OWNER` placeholder~~ — done; the repository lives at
-      `SanTanBan/ProofGraph`.
+      `SanTanBan/ProofWeb`.
 - [ ] **Two independent reviewers on all 8 theorems.** Every node moves to
       `reviewed` or gets an issue. This is the binding constraint and it is not
       glamorous.
@@ -119,7 +119,7 @@ The study:
 Run alongside it, and much sooner — two days of work:
 
 - [ ] **The ablation.** Frontier model + web search, versus frontier model +
-      ProofGraph, on step-level attribution for 30 blind steps, judged by a third
+      ProofWeb, on step-level attribution for 30 blind steps, judged by a third
       party. If the graph does not beat plain retrieval by a wide margin, the
       project is finished and should say so.
 
@@ -143,7 +143,7 @@ Added when the project pivoted to mechanistic extraction; see
       count agreement. Still worth repeating with `metamath.exe`/`smm3` before
       any *published* claim rests on an extraction, and worth automating in a
       scheduled CI job.
-- [ ] **`leandojo-to-proofgraph` converter.** LeanDojo already extracts
+- [ ] **`leandojo-to-proofweb` converter.** LeanDojo already extracts
       tactic-level premises from mathlib; converting its traced format into
       this repository's extracted-JSON puts `uses`/`why`/the viewer over
       mathlib data. Integration, not invention — a weekend, not a thesis.

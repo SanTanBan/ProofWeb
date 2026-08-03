@@ -7,7 +7,7 @@ graph's guarantees are worth nothing.
 from __future__ import annotations
 
 from conftest import axiom, theorem
-from proofgraph.validate import validate
+from proofweb.validate import validate
 
 
 def codes(report) -> set[str]:
@@ -161,7 +161,7 @@ def test_theorem_citing_nothing_is_flagged_as_disconnected(make_graph):
 def test_inserting_a_step_does_not_change_any_stable_address(make_graph):
     """The property the whole step-id design exists to provide.
 
-    ProofGraph claims stable sub-proof identity as its defensible contribution.
+    ProofWeb claims stable sub-proof identity as its defensible contribution.
     That claim is only worth anything if an address minted today still denotes the
     same line after the proof is edited — so it is tested, not asserted.
     """

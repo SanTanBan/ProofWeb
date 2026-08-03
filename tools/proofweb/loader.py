@@ -1,4 +1,4 @@
-"""Read YAML node files off disk into a :class:`~proofgraph.model.Graph`."""
+"""Read YAML node files off disk into a :class:`~proofweb.model.Graph`."""
 
 from __future__ import annotations
 

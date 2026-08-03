@@ -1,5 +1,5 @@
 {
- "format": "proofgraph/extracted",
+ "format": "proofweb/extracted",
  "version": 1,
  "module": "metamath-set",
  "source": "set.mm",
@@ -19,8 +19,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -49,8 +49,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -76,7 +76,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -93,7 +93,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -113,7 +113,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -130,7 +130,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -147,7 +147,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -164,7 +164,7 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)"
    },
    "steps": []
   },
@@ -187,8 +187,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -254,8 +254,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -321,8 +321,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -370,8 +370,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -417,8 +417,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -456,8 +456,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -514,8 +514,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -564,8 +564,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -622,8 +622,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -672,8 +672,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -730,8 +730,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -798,8 +798,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -873,8 +873,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -931,8 +931,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {
@@ -996,8 +996,8 @@
    },
    "provenance": {
     "source": "set.mm",
-    "contributed_by": "proofgraph.metamath extractor (mechanical, no AI)",
-    "note": "proof replayed and checked by proofgraph's Metamath verifier (substitution, stack discipline, $d conditions)"
+    "contributed_by": "proofweb.metamath extractor (mechanical, no AI)",
+    "note": "proof replayed and checked by proofweb's Metamath verifier (substitution, stack discipline, $d conditions)"
    },
    "steps": [
     {

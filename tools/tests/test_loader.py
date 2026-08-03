@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import yaml
 from conftest import axiom, theorem
-from proofgraph.loader import iter_node_files, load_graph
-from proofgraph.validate import validate
+from proofweb.loader import iter_node_files, load_graph
+from proofweb.validate import validate
 
 
 def test_a_module_nested_inside_another_does_not_double_load(tmp_path):

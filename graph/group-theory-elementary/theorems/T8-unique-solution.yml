@@ -59,7 +59,7 @@ formalization:
   metamath: grpdiveu
 provenance:
   source: 'Standard; any first course in algebra.'
-  contributed_by: 'ProofGraph pilot'
+  contributed_by: 'ProofWeb pilot'
   assisted_by: 'Claude (drafted); citation defects found in adversarial review, corrected'
   note: >
     No single mathlib declaration states this. The existence half is mul_inv_cancel_left

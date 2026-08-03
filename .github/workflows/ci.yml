@@ -36,7 +36,7 @@ jobs:
 
       - name: Validate the graph (warnings are errors on CI)
         working-directory: tools
-        run: python -m proofgraph validate --strict
+        run: python -m proofweb validate --strict
 
       - name: Tests
         working-directory: tools
@@ -48,7 +48,7 @@ jobs:
 
       - name: Summary
         working-directory: tools
-        run: python -m proofgraph stats
+        run: python -m proofweb stats
 
   export:
     name: build graph exports
@@ -64,10 +64,10 @@ jobs:
         working-directory: tools
         run: |
           mkdir -p ../build
-          python -m proofgraph render json -o ../build/graph.json
-          python -m proofgraph render dot  -o ../build/graph.dot
-          python -m proofgraph render mermaid -o ../build/graph.mmd
+          python -m proofweb render json -o ../build/graph.json
+          python -m proofweb render dot  -o ../build/graph.dot
+          python -m proofweb render mermaid -o ../build/graph.mmd
       - uses: actions/upload-artifact@v4
         with:
-          name: proofgraph-exports
+          name: proofweb-exports
           path: build/

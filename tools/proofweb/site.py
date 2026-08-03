@@ -260,7 +260,7 @@ paint();
 """
 
 
-def to_html(graph: Graph, title: str = "ProofGraph") -> str:
+def to_html(graph: Graph, title: str = "ProofWeb") -> str:
     data = json.dumps(_payload(graph), ensure_ascii=False)
     colours = json.dumps(_COLOURS)
     n_theorems = sum(1 for n in graph if n.is_theorem)

@@ -8,8 +8,8 @@ from __future__ import annotations
 import json
 
 from conftest import REPO_ROOT
-from proofgraph.render import explain, summarise, to_dot, to_json, to_mermaid
-from proofgraph.validate import validate
+from proofweb.render import explain, summarise, to_dot, to_json, to_mermaid
+from proofweb.validate import validate
 
 GRAPH = REPO_ROOT / "graph"
 
@@ -72,7 +72,7 @@ def test_exporters_produce_something_parseable():
         "proof edges must carry the step that created them"
 
     dot = to_dot(graph)
-    assert dot.startswith("digraph proofgraph {") and dot.rstrip().endswith("}")
+    assert dot.startswith("digraph proofweb {") and dot.rstrip().endswith("}")
     assert 'label="step 12"' in dot
 
     mermaid = to_mermaid(graph)
@@ -84,7 +84,7 @@ def test_html_export_is_self_contained_and_carries_step_numbers():
     """The viewer must open from a file path on a machine with nothing installed."""
     import re
 
-    from proofgraph.site import to_html
+    from proofweb.site import to_html
 
     graph, _ = validate(GRAPH)
     html = to_html(graph)

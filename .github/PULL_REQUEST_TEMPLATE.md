@@ -12,9 +12,9 @@
 
 ## Checklist
 
-- [ ] `cd tools && python -m proofgraph validate --strict` passes
+- [ ] `cd tools && python -m proofweb validate --strict` passes
 - [ ] `cd tools && python -m pytest` passes
-- [ ] I read each new node back with `python -m proofgraph why <id>` and the
+- [ ] I read each new node back with `python -m proofweb why <id>` and the
       dependencies it printed are the ones I intended
 - [ ] Every step cites what it uses, and nothing it does not use
 - [ ] `provenance.source` says where the mathematics comes from

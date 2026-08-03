@@ -1,4 +1,4 @@
-"""Command line entry point.  ``python -m proofgraph <command>``
+"""Command line entry point.  ``python -m proofweb <command>``
 
     validate    check every machine-checkable invariant (this is what CI runs)
     stats       counts, depths, and how much of the graph is machine-backed
@@ -138,7 +138,7 @@ def cmd_extract(args: argparse.Namespace) -> int:
 
     if args.html:
         from .site import to_html
-        title = f"ProofGraph — {Path(args.database).name}"
+        title = f"ProofWeb — {Path(args.database).name}"
         Path(args.html).write_text(to_html(graph, title=title), encoding="utf-8")
         print(f"wrote {args.html}", file=sys.stderr)
     return 0
@@ -174,7 +174,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="proofgraph",
+        prog="proofweb",
         description="A knowledge graph of mathematics whose edges are derived from proofs.",
     )
     parser.add_argument("--graph", metavar="DIR", default=None,

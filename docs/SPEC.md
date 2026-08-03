@@ -1,4 +1,4 @@
-# The ProofGraph node format
+# The ProofWeb node format
 
 This is the normative description of what a node file means. It is short on
 purpose. If you are here to add mathematics, read [CONTRIBUTING.md](../CONTRIBUTING.md)
@@ -27,7 +27,7 @@ cite T4 as its justification. The consequences are worth stating plainly:
   about two theorems; it is the fact that **step 12 of T6** is where uniqueness
   of inverses is used. That is the query the whole format exists to answer.
 
-This is why `proofgraph why T6` can tell you not just *what* T6 rests on but
+This is why `proofweb why T6` can tell you not just *what* T6 rests on but
 *where*, and why a diff to a proof is automatically a diff to the graph.
 
 ---
@@ -288,7 +288,7 @@ fastest way for a project like this to lose the only thing it has.
 
 ## 8. What the validator checks, and what it cannot
 
-`python -m proofgraph validate` enforces:
+`python -m proofweb validate` enforces:
 
 - every node validates against `schema/node.schema.json`
 - node ids are unique; every cited id exists

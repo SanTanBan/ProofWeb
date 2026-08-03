@@ -1,10 +1,16 @@
-# ProofGraph
+# ProofWeb
 
 **A knowledge graph of mathematics whose edges are derived from proofs, not
 declared beside them.**
 
-[![CI](https://github.com/SanTanBan/ProofGraph/actions/workflows/ci.yml/badge.svg)](https://github.com/SanTanBan/ProofGraph/actions/workflows/ci.yml)
+[![CI](https://github.com/SanTanBan/ProofWeb/actions/workflows/ci.yml/badge.svg)](https://github.com/SanTanBan/ProofWeb/actions/workflows/ci.yml)
 &nbsp;·&nbsp; 14 nodes &nbsp;·&nbsp; 63 proof edges &nbsp;·&nbsp; 0 reviewed &nbsp;·&nbsp; MIT (tools) + CC BY 4.0 (content)
+
+> Renamed from **ProofGraph** in August 2026 — "proof graph" is a generic term
+> used by several unrelated projects, and this one would rather be findable
+> than fought over. Old links redirect. (The name ProofWeb also has history:
+> Radboud University's web interface for teaching Coq, ~2007–2013. See the
+> [comparison table](#how-this-differs-from-neighbouring-projects) below.)
 
 ```
 T6 — The inverse of a product reverses the order
@@ -49,7 +55,7 @@ wrong about itself.
 ## Two tracks, one graph
 
 **The formal track (mechanistic, no AI).** Edges extracted from machine-checked
-proofs by [`proofgraph.metamath`](tools/proofgraph/metamath.py): a pure-Python
+proofs by [`proofweb.metamath`](tools/proofweb/metamath.py): a pure-Python
 Metamath parser, compressed-proof decoder and **verifier** that replays every
 proof — substitution, stack discipline, disjoint-variable conditions — before
 emitting a single edge. An extracted edge is a fact about a checked proof, not
@@ -69,29 +75,29 @@ control group.
 ## Try it in two minutes
 
 ```bash
-git clone https://github.com/SanTanBan/ProofGraph && cd ProofGraph/tools
+git clone https://github.com/SanTanBan/ProofWeb && cd ProofWeb/tools
 pip install -r requirements.txt
 
-python -m proofgraph validate --strict     # every machine-checkable invariant
-python -m proofgraph why T6                # what it rests on, and at which step
-python -m proofgraph stats
-python -m proofgraph render html -o ../build/proofgraph.html
+python -m proofweb validate --strict     # every machine-checkable invariant
+python -m proofweb why T6                # what it rests on, and at which step
+python -m proofweb stats
+python -m proofweb render html -o ../build/proofweb.html
 ```
 
 And the formal track, on real mathematics:
 
 ```bash
 curl -L -o ../corpora/set.mm https://raw.githubusercontent.com/metamath/set.mm/develop/set.mm
-python -m proofgraph extract ../corpora/set.mm --stop-at id -o ../examples/setmm.json --html ../build/setmm.html
-python -m proofgraph why id --json ../examples/setmm.json       # id, back to ax-1/ax-2/ax-mp
-python -m proofgraph uses ax-mp --json ../examples/setmm.json   # every STEP that invokes ax-mp
+python -m proofweb extract ../corpora/set.mm --stop-at id -o ../examples/setmm.json --html ../build/setmm.html
+python -m proofweb why id --json ../examples/setmm.json       # id, back to ax-1/ax-2/ax-mp
+python -m proofweb uses ax-mp --json ../examples/setmm.json   # every STEP that invokes ax-mp
 ```
 
 That last query — *every proof step in the corpus that invoked a given theorem,
 with the claim proved at that step* — is the reverse step-level lookup that,
 per [the prior-art survey](docs/PRIOR-ART.md), no existing search engine serves.
 
-Open `build/proofgraph.html`, click node **T6**, then click its last step. Exactly
+Open `build/proofweb.html`, click node **T6**, then click its last step. Exactly
 the edges that step created light up — `T6→T4`, `T6→L1`, `T6→A1` — while the
 `s:`-prefixed citations create none, because they point at earlier steps of the
 same proof. That is the thesis, made clickable. The file is self-contained: no
@@ -101,11 +107,11 @@ build step, no network, no dependencies.
 
 | | |
 |---|---|
-| [`tools/proofgraph/metamath.py`](tools/proofgraph/metamath.py) | **The formal track.** Metamath parser + verifier + step-level extractor. Mechanistic: no AI anywhere in the pipeline. |
+| [`tools/proofweb/metamath.py`](tools/proofweb/metamath.py) | **The formal track.** Metamath parser + verifier + step-level extractor. Mechanistic: no AI anywhere in the pipeline. |
 | [`graph/group-theory-elementary/`](graph/group-theory-elementary) | The informal-track pilot. 4 group axioms, 2 background principles about equality, 8 theorems. |
 | [`examples/setmm-through-id.json`](examples/setmm-through-id.json) | A sample extraction from set.mm (public domain), through the theorem `id`: 23 nodes, 17 kernel-checked theorems. |
 | [`schema/node.schema.json`](schema/node.schema.json) | What a node file may contain. |
-| [`tools/proofgraph/`](tools/proofgraph) | Loader, validator, graph queries, exporters (dot / mermaid / json / html). ~2,000 lines, two dependencies, 63 tests. |
+| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html). ~2,000 lines, two dependencies, 63 tests. |
 | [`docs/FORMAL-TRACK.md`](docs/FORMAL-TRACK.md) | The extraction architecture: Metamath (built), Lean (integration with LeanDojo), Rocq (greenfield spec), and how a proof graph honestly helps attack open problems. |
 | [`docs/SPEC.md`](docs/SPEC.md) | What a node file *means*. Start here to contribute mathematics. |
 | [`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) | **Read this before anything else.** Who has already done this, and what is genuinely left. |

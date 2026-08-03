@@ -1,11 +1,11 @@
 # The formal track: mechanistic extraction from proof assistants
 
-This document is the design for the half of ProofGraph where the edges are
+This document is the design for the half of ProofWeb where the edges are
 **facts, not judgements**: graphs extracted mechanically — no AI, no human
 citation-typing — from machine-checked proofs. It exists because of a specific
 piece of feedback that reshaped the project:
 
-> Build a mechanistic codebase that develops the ProofGraph by extracting
+> Build a mechanistic codebase that develops the ProofWeb by extracting
 > existing proofs, theorems and axioms — no AI API should be needed, as this
 > method should someday be an enhanced part of interconnected formal analysis.
 
@@ -56,11 +56,11 @@ proof is worth pointing at, the formal world's answer is to *extract it as a
 lemma* — at which point it becomes a node and everything works. Detecting
 repeated sub-proof patterns that deserve extraction is a real research topic
 (grammar compression over proof terms, [arXiv:2505.12305](https://arxiv.org/abs/2505.12305)),
-and a populated ProofGraph is the right substrate for it.
+and a populated ProofWeb is the right substrate for it.
 
 ## 2. What is built and working today: the Metamath extractor
 
-[`tools/proofgraph/metamath.py`](../tools/proofgraph/metamath.py) — roughly 600
+[`tools/proofweb/metamath.py`](../tools/proofweb/metamath.py) — roughly 600
 lines, two dependencies, no AI, no toolchain beyond Python.
 
 **Why Metamath first.** A Metamath database is a single plain-text file; the
@@ -74,7 +74,7 @@ faked here.
 **What it does.** Parses any `.mm` database (normal and compressed proofs,
 including `Z`-tagged step reuse), replays every proof through a built-in
 verifier — substitution, stack discipline, and disjoint-variable conditions
-per the Metamath spec — and emits ProofGraph nodes whose steps are the logical
+per the Metamath spec — and emits ProofWeb nodes whose steps are the logical
 (`|-`) replay steps, each carrying machine-derived `by` lists: the earlier
 steps it consumed, in mandatory-hypothesis order, plus the assertion it
 applied. Grammar steps (wff assembly) become vocabulary edges rather than
@@ -84,15 +84,15 @@ the reason recorded.
 
 ```bash
 # extract everything up to and including set.mm's `id`, with the viewer
-python -m proofgraph extract corpora/set.mm --stop-at id \
+python -m proofweb extract corpora/set.mm --stop-at id \
     -o examples/setmm-through-id.json --html build/setmm.html
 
 # what does mp2 rest on, and at which steps?
-python -m proofgraph why mp2 --json examples/setmm-through-id.json
+python -m proofweb why mp2 --json examples/setmm-through-id.json
 
 # every proof step in the extract that invokes ax-mp — the reverse
 # step-level lookup that no existing search engine serves
-python -m proofgraph uses ax-mp --json examples/setmm-through-id.json
+python -m proofweb uses ax-mp --json examples/setmm-through-id.json
 ```
 
 **Evidence, from this repository's own runs.** The full set.mm — **all 47,588
@@ -145,13 +145,13 @@ Two granularities exist and they are genuinely different:
   post-elaboration — `simp` becomes a large generated term, and the structure
   reflects the elaborator's output more than the human's argument.
 - **Tactic-level** (what the human wrote): `intro`, `rw [add_comm]`,
-  `exact mul_left_cancel …` — this is the layer matching ProofGraph's notion
+  `exact mul_left_cancel …` — this is the layer matching ProofWeb's notion
   of a "step". **[LeanDojo](https://leandojo.org/leandojo.html) already
   extracts this**, with premises annotated per tactic and goal states before
   and after, for all of mathlib.
 
 Consequence, stated plainly so this project does not waste a volunteer's year:
-**the Lean work is integration, not invention.** A `leandojo-to-proofgraph`
+**the Lean work is integration, not invention.** A `leandojo-to-proofweb`
 converter — LeanDojo's traced tactics into this repository's node format, so
 `uses`/`why`/the viewer run over mathlib data — is a weekend-scale project
 with real value (the reverse step-level index over mathlib does not exist as
@@ -190,7 +190,7 @@ So the honest architecture is two components:
 Emit the same extracted-JSON this repository already loads, and the viewers
 and queries come for free.
 
-## 5. After construction: how a ProofGraph helps attack open problems
+## 5. After construction: how a ProofWeb helps attack open problems
 
 Asked directly: once the graph exists, how does it help prove something new —
 an Erdős problem, a conjecture? Honestly, in four mechanisms, in decreasing
