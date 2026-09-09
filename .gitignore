@@ -13,8 +13,11 @@ venv/
 /dist/
 /site/build/
 
-# Downloaded corpora (set.mm is ~50 MB; fetch it, don't commit it)
+# Downloaded corpora. Fetch them; never commit them.
 #   curl -L -o corpora/set.mm https://raw.githubusercontent.com/metamath/set.mm/develop/set.mm
+#   git clone --filter=blob:none --sparse --depth 1 -c core.autocrlf=false \
+#       https://github.com/anthropics/fermats-last-theorem corpora/fermats-last-theorem
+#   git -C corpora/fermats-last-theorem sparse-checkout set Theorems P2M Definitions
 /corpora/
 
 # Editors / OS

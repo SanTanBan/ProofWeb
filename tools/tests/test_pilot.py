@@ -6,6 +6,7 @@ If elementary group theory cannot survive the validator, nothing harder will.
 from __future__ import annotations
 
 import json
+import re
 
 from conftest import REPO_ROOT
 from proofweb.render import explain, summarise, to_dot, to_json, to_mermaid
@@ -113,7 +114,7 @@ def test_explain_reports_the_step_a_dependency_entered_at():
     text = explain(graph, "T6")
     # Stable addresses, not ordinals: an ordinal in a citation goes stale the
     # first time somebody inserts a step.
-    assert "T4     Inverses are unique — used at #conclude" in text
+    assert re.search(r"T4\s+Inverses are unique — used at #conclude", text)
     assert "[T6#conclude]" in text
     assert "T2" in text and "indirectly" in text
     assert "No such node" not in text

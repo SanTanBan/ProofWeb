@@ -108,6 +108,18 @@
         "note": {
           "type": "string",
           "description": "Free prose about the node's status. Exists so that explanations never get smuggled into `formalization`, whose values must stay real declaration names — a prose placeholder there would satisfy the `verified` check without backing it."
+        },
+        "derivation": {
+          "enum": ["kernel-replay", "imports", "manual"],
+          "description": "How this node's EDGES were obtained. `kernel-replay`: a checker in this repository replayed the proof before emitting them. `imports`: read off a corpus whose layout makes a proof's imports its citations, checked by a kernel elsewhere. `manual`: a human wrote them. These are not equally strong and must not be presented as if they were."
+        },
+        "step_attribution": {
+          "enum": ["kernel", "textual", "human", "none"],
+          "description": "How each citation was placed on a particular step. `textual` means a name was found in the proof script, which is evidence and not proof."
+        },
+        "checked_by": {
+          "type": "string",
+          "description": "Who or what checked the proof, and whether it was this project. Required reading whenever status is `verified` on an imported node."
         }
       }
     },

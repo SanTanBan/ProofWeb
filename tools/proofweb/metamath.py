@@ -631,8 +631,16 @@ def extract(db: Database, *, module: str, source: str) -> list[Node]:
 # ---------------------------------------------------------------------------
 
 
-def nodes_to_json(nodes: Iterable[Node], *, module: str, source: str) -> dict:
-    return {
+def nodes_to_json(nodes: Iterable[Node], *, module: str, source: str,
+                  meta: dict | None = None) -> dict:
+    """Serialise nodes to the interchange format.
+
+    ``meta`` carries corpus-level facts an importer knows and a node does not:
+    which commit, how the edges were derived, what checked the proofs. It is
+    descriptive only — no query reads it — but it is what lets a reader of a
+    30,000-node file tell a kernel-replayed graph from a text-derived one.
+    """
+    payload = {
         "format": "proofweb/extracted",
         "version": 1,
         "module": module,
@@ -646,14 +654,20 @@ def nodes_to_json(nodes: Iterable[Node], *, module: str, source: str) -> dict:
                 "status": n.status,
                 "formalization": n.formalization,
                 "provenance": n.provenance,
+                "tags": list(n.tags),
+                "source_path": n.source_path,
                 "steps": [
-                    {"n": s.n, "id": s.sid, "claim": s.claim, "by": list(s.by)}
+                    {"n": s.n, "id": s.sid, "claim": s.claim, "by": list(s.by),
+                     **({"note": s.note} if s.note else {})}
                     for s in n.steps
                 ],
             }
             for n in nodes
         ],
     }
+    if meta:
+        payload["meta"] = meta
+    return payload
 
 
 def nodes_from_json(data: dict) -> list[Node]:
@@ -665,7 +679,7 @@ def nodes_from_json(data: dict) -> list[Node]:
     for nd in data["nodes"]:
         steps = tuple(
             Step(n=s["n"], sid=s.get("id"), claim=s["claim"],
-                 by=tuple(s["by"]))
+                 by=tuple(s["by"]), note=s.get("note"))
             for s in nd.get("steps", ())
         )
         out.append(Node(
@@ -679,9 +693,9 @@ def nodes_from_json(data: dict) -> list[Node]:
             status=nd.get("status", "draft"),
             formalization=dict(nd.get("formalization", {})),
             provenance=dict(nd.get("provenance", {})),
-            tags=(),
+            tags=tuple(nd.get("tags", ())),
             module=module,
-            source_path=f"{source}:{nd['id']}",
+            source_path=nd.get("source_path") or f"{source}:{nd['id']}",
             raw={},
         ))
     return out

@@ -108,7 +108,7 @@ def to_json(graph: Graph) -> str:
     return json.dumps(payload, indent=2, ensure_ascii=False)
 
 
-def explain(graph: Graph, node_id: str) -> str:
+def explain(graph: Graph, node_id: str, *, limit: int | None = None) -> str:
     """Human-readable answer to 'what does this rest on, and where exactly?'.
 
     This is the query the whole schema exists to make possible. A dependency
@@ -134,7 +134,8 @@ def explain(graph: Graph, node_id: str) -> str:
             out.append("  Strategy: " + " ".join(node.strategy.split()))
             out.append("")
         out.append("  Proof:")
-        for step in node.steps:
+        step_list = node.steps if limit is None else node.steps[:limit]
+        for step in step_list:
             cites = []
             for token in step.by:
                 target = graph.get(token)
@@ -144,12 +145,15 @@ def explain(graph: Graph, node_id: str) -> str:
             out.append(f"         by {', '.join(cites)}")
             if step.note:
                 out.append(f"         note: {step.note}")
+        if limit is not None and len(node.steps) > limit:
+            out.append(f"    ... and {len(node.steps) - limit} more step(s)")
 
     deps = sorted(graph.ancestors(node_id, ("proof",)))
     if deps:
         out.append("")
         out.append(f"  Rests on {len(deps)} node(s), transitively:")
-        for dep in deps:
+        shown = deps if limit is None else deps[:limit]
+        for dep in shown:
             target = graph.get(dep)
             direct = [e for e in node.edges() if e.dst == dep and e.kind == "proof"]
             if direct:
@@ -159,14 +163,25 @@ def explain(graph: Graph, node_id: str) -> str:
                     (f"#{e.step_id}" if e.step_id else f"step {e.step}") for e in direct)
             else:
                 where = " — indirectly"
-            out.append(f"    {dep:<6} {target.title if target else '?'}{where}")
+            out.append(f"    {dep:<40} {target.title[:44] if target else '?'}{where}")
+        if limit is not None and len(deps) > limit:
+            out.append(f"    ... and {len(deps) - limit} more")
 
     users = sorted(graph.descendants(node_id, ("proof",)))
     if users:
         out.append("")
-        out.append(f"  Used by {len(users)} node(s): " + ", ".join(users))
+        shown_u = users if limit is None else users[:limit]
+        more = "" if limit is None or len(users) <= limit else f", ... (+{len(users) - limit})"
+        out.append(f"  Used by {len(users)} node(s): " + ", ".join(shown_u) + more)
 
     return "\n".join(out)
+
+
+def _few(ids: list[str], cap: int = 8) -> str:
+    """Name a handful and count the rest. A layer of a real corpus has thousands."""
+    if len(ids) <= cap:
+        return ", ".join(ids)
+    return ", ".join(ids[:cap]) + f", ... (+{len(ids) - cap} more)"
 
 
 def summarise(graph: Graph) -> str:
@@ -197,6 +212,11 @@ def summarise(graph: Graph) -> str:
     # project's first kill criterion is that this number is still zero in six
     # months. A statistic you have to go looking for is a statistic nobody reads.
     out.append(f"reviewed         {reviewed}/{len(graph)}   verified  {verified}/{len(graph)}")
+    meta = getattr(graph, "meta", None) or {}
+    if verified and meta.get("derivation"):
+        replayed = "proofweb" if meta.get("derivation") == "kernel-replay" else "0"
+        out.append(f"                 ^ {replayed} replayed here; edges derived by "
+                   f"`{meta['derivation']}`, checked by {meta.get('checked_by', '?')}")
     if reviewed == 0:
         out.append("                 ^ nothing here has been checked by a second person yet")
 

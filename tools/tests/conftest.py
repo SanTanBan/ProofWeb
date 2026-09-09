@@ -65,3 +65,18 @@ def theorem(title: str, steps: list[dict], **kw) -> dict:
     }
     node.update(kw)
     return node
+
+
+@pytest.fixture
+def p2m_repo(tmp_path: Path) -> Path:
+    """A miniature Prove2Me corpus following the upstream file conventions."""
+    from p2m_fixture import write_corpus
+    return write_corpus(tmp_path / "mini-corpus")
+
+
+@pytest.fixture
+def p2m_repo_with_sorry(tmp_path: Path) -> Path:
+    from p2m_fixture import add_sorry, write_corpus
+    root = write_corpus(tmp_path / "mini-corpus-sorry")
+    add_sorry(root)
+    return root

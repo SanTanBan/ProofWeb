@@ -143,6 +143,16 @@ Added when the project pivoted to mechanistic extraction; see
       count agreement. Still worth repeating with `metamath.exe`/`smm3` before
       any *published* claim rests on an extraction, and worth automating in a
       scheduled CI job.
+- [x] **Import a Lean corpus from text.** Done, and larger than planned: the
+      September 2026 release of Anthropic's 13-million-line, 29,511-theorem FLT
+      proof turned out to be importable with no Lean toolchain at all, because
+      the Prove2Me layout makes a proof's imports its citations. Six published
+      figures reproduced exactly; see [FORMAL-TRACK.md](FORMAL-TRACK.md) §3a.
+- [ ] **Import the other two AI-written corpora.** `openai/NavierStokesAndEuler`
+      and `tristanbuckmaster/fluid_lean` are ordinary lake projects, not
+      Prove2Me, so their imports are file-level rather than citation-level: a
+      `--style lake` mode, module-granularity, `status: draft`. Smaller value
+      than FLT and a day of work.
 - [ ] **`leandojo-to-proofweb` converter.** LeanDojo already extracts
       tactic-level premises from mathlib; converting its traced format into
       this repository's extracted-JSON puts `uses`/`why`/the viewer over
@@ -150,6 +160,15 @@ Added when the project pivoted to mechanistic extraction; see
 - [ ] **The Rocq extractor** ([FORMAL-TRACK.md §4](FORMAL-TRACK.md)) — the
       genuine greenfield. Needs a collaborator who knows `rocq-lsp`; this item
       is the single most valuable thing an outside contributor could pick up.
+- [ ] **Measure the text against the kernel.** The FLT import attributes
+      citations to proof lines *textually*, and grades each occurrence
+      (81.5% fully qualified, 3.5% field notation that text cannot resolve at
+      all). Building a sample of low-closure theorems with `lake build
+      Theorems.Thm_X` and comparing the textual `by` lists against the kernel's
+      constants would turn that grading into a measured precision and recall.
+      Unlike the withdrawn Erdős experiment this compares **two extractions of
+      the same proof**, so divergence is a genuine error rate. Pre-register the
+      thresholds.
 
 ## Phase 4 — The one contribution that might be real
 

@@ -104,6 +104,7 @@ ol.steps li:hover,ol.steps li.active{border-left-color:var(--hl);background:var(
 border:1px solid var(--line);cursor:pointer;font-family:ui-monospace,monospace;font-size:11px}
 .cite.node{color:var(--accent);border-color:currentColor}
 .cite.local{color:var(--muted)}
+.cite.ext{color:var(--muted);border-style:dashed;opacity:.85}
 .note{font-size:12px;color:var(--muted);margin-top:5px}
 .addr{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--muted);
 margin-top:4px;opacity:.75}
@@ -216,9 +217,12 @@ function renderPanel(n) {
   const p = document.getElementById("panel");
   if (!n) { p.innerHTML = '<p class="empty">Select a node.</p>'; return; }
 
+  const LOCAL = /^(?:hyp(?::.*)?|s\d+|s:.*|assumption)$/;
   const cite = tok => NODES.has(tok)
     ? `<span class="cite node" data-goto="${tok}" title="${esc(NODES.get(tok).title)}">${tok}</span>`
-    : `<span class="cite local" title="local to this proof — creates no edge">${esc(tok)}</span>`;
+    : LOCAL.test(tok)
+      ? `<span class="cite local" title="local to this proof — creates no edge">${esc(tok)}</span>`
+      : `<span class="cite ext" title="cited, but outside this view">${esc(tok)}</span>`;
 
   const steps = n.steps.map(s => `
     <li data-step="${s.n}" class="${s.n === activeStep ? "active" : ""}">
@@ -260,11 +264,12 @@ paint();
 """
 
 
-def to_html(graph: Graph, title: str = "ProofWeb") -> str:
+def to_html(graph: Graph, title: str = "ProofWeb", subtitle: str | None = None) -> str:
     data = json.dumps(_payload(graph), ensure_ascii=False)
     colours = json.dumps(_COLOURS)
     n_theorems = sum(1 for n in graph if n.is_theorem)
     n_proof_edges = len(graph.edges("proof"))
+    sub = f" — {subtitle}" if subtitle else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -277,7 +282,7 @@ def to_html(graph: Graph, title: str = "ProofWeb") -> str:
 <header>
   <h1>{title}</h1>
   <p>{len(graph)} nodes · {n_theorems} theorems · {n_proof_edges} proof edges,
-     each one derived from a single step of a single proof</p>
+     each one derived from a single step of a single proof{sub}</p>
   <label><input type="checkbox" id="vocab"> show vocabulary edges</label>
 </header>
 <main>

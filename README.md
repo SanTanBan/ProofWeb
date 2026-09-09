@@ -54,15 +54,24 @@ wrong about itself.
 
 ## Two tracks, one graph
 
-**The formal track (mechanistic, no AI).** Edges extracted from machine-checked
-proofs by [`proofweb.metamath`](tools/proofweb/metamath.py): a pure-Python
-Metamath parser, compressed-proof decoder and **verifier** that replays every
-proof — substitution, stack discipline, disjoint-variable conditions — before
-emitting a single edge. An extracted edge is a fact about a checked proof, not
-anyone's opinion. Scale-tested against the real thing: **all 47,588 proofs of
-set.mm verify in 39 seconds, zero failures**, matching the canonical
-`mmverify.py` verdict on the same snapshot. The Lean and Rocq paths are
-designed in [docs/FORMAL-TRACK.md](docs/FORMAL-TRACK.md).
+**The formal track (mechanistic, no AI).** Edges read off machine-checked
+proofs, never typed by hand. Two corpora, two strengths of claim:
+
+- **Metamath** — [`proofweb.metamath`](tools/proofweb/metamath.py) is a
+  pure-Python parser, compressed-proof decoder and **verifier** that replays
+  every proof (substitution, stack discipline, disjoint-variable conditions)
+  before emitting a single edge. **All 47,588 proofs of set.mm verify in 39
+  seconds, zero failures**, matching `mmverify.py` on the same snapshot.
+  `derivation: kernel-replay`.
+- **Lean / Prove2Me** — [`proofweb.leanp2m`](tools/proofweb/leanp2m.py) imports
+  Anthropic's **13-million-line, 29,511-theorem Lean proof of Fermat's Last
+  Theorem** from text alone, no toolchain. Six of the figures its authors
+  published about it are reproduced exactly (see below).
+  `derivation: imports` — checked upstream, not replayed here, and the tools
+  say so on every node.
+
+The Rocq path is specified in [docs/FORMAL-TRACK.md](docs/FORMAL-TRACK.md) and
+is the most valuable thing an outside contributor could pick up.
 
 **The informal track (human, reviewed).** The YAML format under `graph/` for
 mathematics that has *no* formal proof yet — where step-level provenance is a
@@ -97,6 +106,40 @@ That last query — *every proof step in the corpus that invoked a given theorem
 with the claim proved at that step* — is the reverse step-level lookup that,
 per [the prior-art survey](docs/PRIOR-ART.md), no existing search engine serves.
 
+And on the largest machine-written proof in existence:
+
+```bash
+git clone --filter=blob:none --sparse --depth 1 -c core.autocrlf=false \
+    https://github.com/anthropics/fermats-last-theorem ../corpora/fermats-last-theorem
+git -C ../corpora/fermats-last-theorem sparse-checkout set Theorems P2M Definitions
+
+python -m proofweb import-lean ../corpora/fermats-last-theorem \
+    --root fermat_last_theorem -o ../build/flt.json      # ~12 min, no Lean needed
+python -m proofweb audit --json ../build/flt.json --compare flt \
+    --root fermat_last_theorem --report ../build/flt-audit.md
+python -m proofweb uses ModularForm_S2_Gamma0_2_eq_zero --json ../build/flt.json
+python -m proofweb render html --json ../build/flt.json \
+    --focus FreyPackage_of_counterexample --radius 2 -o ../build/focus.html
+```
+
+**The audit recomputes what the corpus's authors published about it** — their
+figures come from their own text-only generator, so agreement means two
+independently written parsers read 13 million lines the same way:
+
+| | ProofWeb | Upstream | |
+|---|---:|---:|---|
+| theorem nodes | 29,511 | 29,511 | match |
+| definition modules | 1,450 | 1,450 | match |
+| theorem → theorem citations | 106,853 | 106,853 | match |
+| reachable from the goal | 29,489 | 29,489 | match |
+| theorems outside that closure | 22 | 22 | match |
+| of those, cited by nobody | 19 | 19 | match |
+
+Plus what only a step-level view can say: **273,252 step-level proof edges**,
+each addressed to a line of a named proof file, so `uses` becomes a reverse
+index over the whole corpus. 81.5% of those attributions are fully qualified
+occurrences; the audit grades the rest rather than hiding them.
+
 Open `build/proofweb.html`, click node **T6**, then click its last step. Exactly
 the edges that step created light up — `T6→T4`, `T6→L1`, `T6→A1` — while the
 `s:`-prefixed citations create none, because they point at earlier steps of the
@@ -107,11 +150,13 @@ build step, no network, no dependencies.
 
 | | |
 |---|---|
-| [`tools/proofweb/metamath.py`](tools/proofweb/metamath.py) | **The formal track.** Metamath parser + verifier + step-level extractor. Mechanistic: no AI anywhere in the pipeline. |
+| [`tools/proofweb/metamath.py`](tools/proofweb/metamath.py) | **Formal track, Metamath.** Parser + verifier + step-level extractor; replays every proof before emitting an edge. |
+| [`tools/proofweb/leanp2m.py`](tools/proofweb/leanp2m.py) | **Formal track, Lean.** Imports a Prove2Me corpus (statements, proofs, definitions) from text, with no Lean toolchain. |
+| [`tools/proofweb/audit.py`](tools/proofweb/audit.py) | Checks an imported corpus against the figures its makers published, and reports what the text alone cannot account for. |
 | [`graph/group-theory-elementary/`](graph/group-theory-elementary) | The informal-track pilot. 4 group axioms, 2 background principles about equality, 8 theorems. |
 | [`examples/setmm-through-id.json`](examples/setmm-through-id.json) | A sample extraction from set.mm (public domain), through the theorem `id`: 23 nodes, 17 kernel-checked theorems. |
 | [`schema/node.schema.json`](schema/node.schema.json) | What a node file may contain. |
-| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html). ~2,000 lines, two dependencies, 63 tests. |
+| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html / focused views). ~3,500 lines, two dependencies, 122 tests. |
 | [`docs/FORMAL-TRACK.md`](docs/FORMAL-TRACK.md) | The extraction architecture: Metamath (built), Lean (integration with LeanDojo), Rocq (greenfield spec), and how a proof graph honestly helps attack open problems. |
 | [`docs/SPEC.md`](docs/SPEC.md) | What a node file *means*. Start here to contribute mathematics. |
 | [`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) | **Read this before anything else.** Who has already done this, and what is genuinely left. |
@@ -141,6 +186,10 @@ have for decades.** This project does not claim otherwise, and
   at 308,129 declarations and 8.4M edges.
 - **[TheoremGraph](https://arxiv.org/abs/2606.25363)** — 388k formal nodes and
   11.3M edges joined against 11.7M arXiv statements.
+- **[Prove2Me](https://arxiv.org/abs/2608.28433)** — the platform behind the FLT
+  corpus: a construction-time DAG of theorem statements that agents coordinate
+  around. Statement-level, authenticated API, no bulk export. Its own paper lists
+  *"how to extract human-legible insight from machine-generated proofs"* as open.
 
 And Lean and Rocq proof terms *are* the dependency structure — it is unexposed
 and unindexed, not undiscovered. Anyone claiming to recover hidden structure is
@@ -208,10 +257,12 @@ with the people it is asking for help.
 Informal track: fourteen hand-written nodes, one module, **zero reviewed** —
 two independent humans have to sign off on a node and none has yet.
 
-Formal track: the Metamath pipeline is real and tested (63 tests, including
-replaying the opening of set.mm with zero failures), and extracted nodes are
-`verified` in the strict sense: a machine replayed each proof from the axioms
-before any edge was emitted. Lean and Rocq extraction are designs, not code.
+Formal track: two corpora import and audit cleanly. Metamath nodes are
+`verified` in the strictest sense available — this repository's own verifier
+replayed each proof from the axioms before emitting an edge. Lean/Prove2Me nodes
+are `verified` on somebody else's kernel check, which the tools label
+`derivation: imports` and never present as our own; `--trust none` refuses the
+inheritance entirely. Rocq extraction is a specification, not code.
 
 One maintainer, not a mathematician by training. That is the entire state of
 the project.

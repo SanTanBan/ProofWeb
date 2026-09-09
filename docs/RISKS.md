@@ -334,6 +334,47 @@ corollary of Birkhoff's theorem answer its naive form in the negative. That is
 real, not cosmetic — but it still costs a reader's attention, and some fraction
 will not read far enough to see it.
 
+## 17. Importing 29,511 nodes that this project did not check
+
+**Severity: severe. Probability: certain — it has already happened.**
+
+The Lean import ([FORMAL-TRACK.md](FORMAL-TRACK.md) §3a) added 29,511 nodes
+marked `verified` in one command, and **ProofWeb replayed none of them.** The
+kernel check was real and was somebody else's: Anthropic's build, `comparator`
+and `nanoda`. That is a different and weaker claim than the Metamath track,
+where this repository's own verifier replays every proof before emitting an
+edge, and the difference is easy to lose in a headline number.
+
+Three specific ways this could mislead, and what is done about each:
+
+1. **`verified` reading as "we checked it."** Every node carries
+   `provenance.derivation` (`imports` here, `kernel-replay` for Metamath) and a
+   `checked_by` that names the checker and says "not replayed by proofweb";
+   `proofweb stats` prints "0 replayed here" beside the verified count; and
+   `--trust none` marks the whole import `draft` for anyone who declines to
+   inherit the check. None of this stops a reader who wants a big number from
+   quoting one.
+2. **Import edges are a convention, not a theorem.** Lean imports are
+   transitive, so a proof *could* use something it does not directly import.
+   The Prove2Me discipline says proofs import exactly what they cite, and the
+   corpus corroborates it — but the guarantee is social, not kernel-enforced,
+   and calling it exact would be an overclaim. Statement/proof *identity* is
+   kernel-enforced by `p2m_exact_reverting`; the citation set is not.
+3. **Line attribution is text, and text is not elaboration.** 81.5% of
+   attributed occurrences carry the theorem's own namespace and are
+   near-certain; 3.5% are field notation, where the prefix is a term and the
+   match cannot be verified from text at all. The audit prints that
+   distribution rather than a single accuracy figure, because a single figure
+   would be invented. Only the term-level extraction in the roadmap can settle
+   it.
+
+**The honest summary:** the formal track now spans two claims of different
+strength under one word. The word is load-bearing, so the difference is printed
+everywhere the word appears — but a project whose whole thesis is that
+provenance should be legible has just taken on 29,511 nodes whose provenance is
+one link longer than its best case, and that is worth stating plainly rather
+than counting as a win.
+
 ---
 
 ## Kill criteria
