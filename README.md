@@ -156,7 +156,7 @@ build step, no network, no dependencies.
 | [`graph/group-theory-elementary/`](graph/group-theory-elementary) | The informal-track pilot. 4 group axioms, 2 background principles about equality, 8 theorems. |
 | [`examples/setmm-through-id.json`](examples/setmm-through-id.json) | A sample extraction from set.mm (public domain), through the theorem `id`: 23 nodes, 17 kernel-checked theorems. |
 | [`schema/node.schema.json`](schema/node.schema.json) | What a node file may contain. |
-| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html / focused views). ~3,500 lines, two dependencies, 122 tests. |
+| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html / focused views). ~4,200 lines, two dependencies, 122 tests (plus 8 more against the real FLT corpus, skipped unless fetched). |
 | [`docs/FORMAL-TRACK.md`](docs/FORMAL-TRACK.md) | The extraction architecture: Metamath (built), Lean (integration with LeanDojo), Rocq (greenfield spec), and how a proof graph honestly helps attack open problems. |
 | [`docs/SPEC.md`](docs/SPEC.md) | What a node file *means*. Start here to contribute mathematics. |
 | [`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) | **Read this before anything else.** Who has already done this, and what is genuinely left. |
