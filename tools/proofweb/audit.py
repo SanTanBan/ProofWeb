@@ -231,11 +231,19 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
     s.say(_cmp("longest dependency chain", deepest[1], None) + f"   ({deepest[0]})")
     s.say("```")
     s.say("")
-    s.say(f"**Most-cited** (distinct citing theorems):")
+    # Split by kind: definition modules are cited far more often than any
+    # theorem, so a single ranking is a list of definitions and tells a reader
+    # nothing about which *results* the corpus leans on.
+    s.say("**Most-cited theorems** (distinct citing theorems):")
     s.say("```")
-    for node_id, count in in_degree.most_common(top):
-        title = graph.get(node_id).title if graph.get(node_id) else "?"
-        s.say(f"  {count:>6}  {node_id[:60]:<60} {title[:40]}")
+    thm_ids = {n.id for n in thms}
+    for node_id, count in [kv for kv in in_degree.most_common() if kv[0] in thm_ids][:top]:
+        s.say(f"  {count:>6}  {node_id[:72]}")
+    s.say("```")
+    s.say("**Most-cited definitions** (the corpus's working vocabulary):")
+    s.say("```")
+    for node_id, count in [kv for kv in in_degree.most_common() if kv[0] not in thm_ids][:top]:
+        s.say(f"  {count:>6}  {node_id[:72]}")
     s.say("```")
     s.say(f"**Largest closures** (rests on the most, transitively):")
     s.say("```")
@@ -244,6 +252,8 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
     s.say("```")
     s.data = {"acyclic": not cyc, "longest_chain": deepest[1], "deepest": deepest[0],
               "top_cited": in_degree.most_common(top),
+              "top_cited_theorems": [kv for kv in in_degree.most_common()
+                                     if kv[0] in {n.id for n in thms}][:top],
               "largest_closures": sorted(closure_sizes.items(), key=lambda kv: -kv[1])[:top]}
 
     # -- 8. does the prose route match the graph? ---------------------------

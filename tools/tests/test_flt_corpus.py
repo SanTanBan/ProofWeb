@@ -31,7 +31,14 @@ UPSTREAM = {
     "in_closure": 29489,
     "outside": 22,
     "uncited": 19,
-    "landmarks": 49,
+    # Upstream reports 49. We extract 52 from the same file with the same two
+    # regexes; the difference is a handful of bare namespace names used as prose
+    # (`ModularCurve`, `AlgebraicGeometry`, and a literal `X.y` placeholder) that
+    # their generator evidently filters and ours does not. Recorded rather than
+    # tuned away: an unexplained match would be worth less than an explained
+    # difference, and the audit prints DIFFERS for it.
+    "landmarks_upstream": 49,
+    "landmarks_ours": 52,
 }
 
 
@@ -85,11 +92,13 @@ def test_no_unfinished_proofs_anywhere(flt):
 
 
 def test_landmarks_resolve_and_are_load_bearing(flt):
-    assert len(flt.meta["landmarks"]) == UPSTREAM["landmarks"]
+    assert len(flt.meta["landmarks"]) == UPSTREAM["landmarks_ours"]
     by_title = {n.title: n.id for n in flt}
     closure = {"fermat_last_theorem"} | flt.ancestors("fermat_last_theorem", ("proof",))
     resolved = [by_title[name] for name in flt.meta["landmarks"] if name in by_title]
     assert len(resolved) >= 30, "most landmarks should name a node in the corpus"
+    # The claim that matters: every landmark the prose route names and that
+    # resolves to a node is something the goal actually rests on.
     stranded = [r for r in resolved if r not in closure]
     assert not stranded, f"landmarks the goal does not rest on: {stranded}"
 

@@ -202,13 +202,29 @@ each addressed to a line of a named proof file, and 129,505 theorem → definiti
 citations that upstream's count does not include. Import takes about twelve
 minutes single-threaded; the audit under a minute.
 
-The one figure that is *not* a match is instructive. Upstream reports 2,890
-citations whose target name never occurs textually in the proof; ProofWeb's
-default `--hit-mode strict` reports more, because its identifier pattern is
-Unicode-aware and theirs is ASCII-only, so the two disagree about names
-containing `ℕ`, `₀` and the like. `--hit-mode anthropic` reproduces their exact
-pattern for comparison. Neither number is *wrong*; they measure slightly
-different things, and saying which is which is the point of having both.
+**Two figures do not match, and they are the more instructive half.**
+
+*Citations never named in the proof script.* Upstream reports 2,890. ProofWeb's
+default `--hit-mode strict` reports 3,644, because its identifier pattern is
+Unicode-aware and theirs is ASCII-only, so the two disagree wherever a name
+touches `ℕ`, `₀` and the like. `--hit-mode anthropic` uses their exact pattern
+and lands at 3,142 — closer, and still 252 above. The residue is a difference in
+which lines count as proof script (this importer excludes `attribute`, `open`
+and other non-proof lines, which upstream's body region does not). Neither
+number is wrong; they measure slightly different things, which is why both modes
+exist and why the audit prints DIFFERS rather than quietly picking one.
+
+*Landmark names in PROOF-PATH.md.* Upstream reports 49; the same two regexes
+over the same file give 52 here. The extra three are bare namespace names used
+as prose (`ModularCurve`, `AlgebraicGeometry`) and a literal `X.y` placeholder,
+which their generator evidently filters. This was left as a recorded difference
+rather than tuned away: a match obtained by adjusting a filter until the number
+agrees would establish nothing, whereas an explained difference of three
+establishes that both tools are reading the same file.
+
+The general rule this follows: **an audit that can only report agreement is not
+an audit.** Every count carries `match` or `DIFFERS by ±n`, and the two that
+differ are documented here rather than in a footnote.
 
 ### What an imported node claims
 
