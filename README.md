@@ -69,6 +69,12 @@ proofs, never typed by hand. Two corpora, two strengths of claim:
   published about it are reproduced exactly (see below).
   `derivation: imports` — checked upstream, not replayed here, and the tools
   say so on every node.
+- **Any Lake project, at module level** —
+  [`proofweb.leanlake`](tools/proofweb/leanlake.py) reads ordinary Lean
+  libraries such as `openai/math` and the Navier–Stokes certificates, where
+  text supports only file-level edges. Every node is `draft`, and the audit
+  reads each project's `formalization.yaml` catalogue to report which results
+  import other results and which have a `sorry` below them.
 
 The Rocq path is specified in [docs/FORMAL-TRACK.md](docs/FORMAL-TRACK.md) and
 is the most valuable thing an outside contributor could pick up.
@@ -135,10 +141,13 @@ independently written parsers read 13 million lines the same way:
 | theorems outside that closure | 22 | 22 | match |
 | of those, cited by nobody | 19 | 19 | match |
 
-Plus what only a step-level view can say: **273,252 step-level proof edges**,
+Plus what only a step-level view can say: **276,403 step-level proof edges**,
 each addressed to a line of a named proof file, so `uses` becomes a reverse
-index over the whole corpus. 81.5% of those attributions are fully qualified
-occurrences; the audit grades the rest rather than hiding them.
+index over the whole corpus. 81.1% of the citations found in the text are fully
+qualified; the audit grades the rest rather than hiding them. A seventh figure,
+citations never named in a proof, matches exactly when upstream's rule is
+replayed. Getting there found two bugs in this importer, described in
+[FORMAL-TRACK.md](docs/FORMAL-TRACK.md) §3a.
 
 Open `build/proofweb.html`, click node **T6**, then click its last step. Exactly
 the edges that step created light up — `T6→T4`, `T6→L1`, `T6→A1` — while the
@@ -152,11 +161,12 @@ build step, no network, no dependencies.
 |---|---|
 | [`tools/proofweb/metamath.py`](tools/proofweb/metamath.py) | **Formal track, Metamath.** Parser + verifier + step-level extractor; replays every proof before emitting an edge. |
 | [`tools/proofweb/leanp2m.py`](tools/proofweb/leanp2m.py) | **Formal track, Lean.** Imports a Prove2Me corpus (statements, proofs, definitions) from text, with no Lean toolchain. |
+| [`tools/proofweb/leanlake.py`](tools/proofweb/leanlake.py) | **Formal track, any Lake project.** One node per source file, import edges labelled as an upper bound, catalogued results and Comparator configurations located. Nothing marked verified. |
 | [`tools/proofweb/audit.py`](tools/proofweb/audit.py) | Checks an imported corpus against the figures its makers published, and reports what the text alone cannot account for. |
 | [`graph/group-theory-elementary/`](graph/group-theory-elementary) | The informal-track pilot. 4 group axioms, 2 background principles about equality, 8 theorems. |
 | [`examples/setmm-through-id.json`](examples/setmm-through-id.json) | A sample extraction from set.mm (public domain), through the theorem `id`: 23 nodes, 17 kernel-checked theorems. |
 | [`schema/node.schema.json`](schema/node.schema.json) | What a node file may contain. |
-| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html / focused views). ~4,200 lines, two dependencies, 122 tests (plus 8 more against the real FLT corpus, skipped unless fetched). |
+| [`tools/proofweb/`](tools/proofweb) | Loader, validator, graph queries, exporters (dot / mermaid / json / html / focused views). ~5,000 lines, two dependencies, 141 tests (plus 9 more against the real FLT corpus, skipped unless fetched). |
 | [`docs/FORMAL-TRACK.md`](docs/FORMAL-TRACK.md) | The extraction architecture: Metamath (built), Lean (integration with LeanDojo), Rocq (greenfield spec), and how a proof graph honestly helps attack open problems. |
 | [`docs/SPEC.md`](docs/SPEC.md) | What a node file *means*. Start here to contribute mathematics. |
 | [`docs/PRIOR-ART.md`](docs/PRIOR-ART.md) | **Read this before anything else.** Who has already done this, and what is genuinely left. |
@@ -224,7 +234,7 @@ checked in August 2026. The table describes artefacts, not motives.
 | **[proofgraph](https://ctan.org/pkg/proofgraph)** (CTAN LaTeX package) + **[result-graph](https://github.com/PierreSenellart/result-graph)**, P. Senellart — CTAN 2026‑06‑04 / repo 2026‑07‑27 | Auto-draw the dependency graph between the results of **one LaTeX article** (and, in the Lean port, of one Lean project) | A LaTeX package (LPPL 1.3c, v1.1.0) emitting Graphviz; a small Lean sibling | Inferred from `\ref`/`\cref` cross-references inside proofs (or per-declaration in Lean); result-level | Maintained; useful for papers | Corpus-scale vs article-scale; step-level vs result-level; our edges are verified and queryable (`uses`, `why`) rather than a rendered figure |
 | **[proofgraph-phase1](https://github.com/banna652/proofgraph-phase1)** ("ProofGraph V0", banna652) — 2026‑01‑25 | Tamper-evident **audit log for router/network events** (WAN loss, failover) via SHA-256 hash chaining | ~17 KB Python: FastAPI ingest, RutOS/syslog event sources, chain verifier script | One record per network event; the only link is `prev_hash` to the previous record — a linear chain, **no graph structure at all** | Spec self-declared frozen; dormant since 2026‑02‑20; 0 stars | Name-only collision: "proof" there means cryptographic integrity, not mathematics |
 | **ProofWeb** (Radboud University, 2006–07; [manual](https://www.cs.ru.nl/~freek/pubs/webded1.pdf)) | Web IDE for **teaching logic with Coq** — server-side provers, Gentzen/Fitch proof rendering, teacher dashboards | Historic; no maintained code found | Students typed Coq proofs in a browser | **Dead**: servers unreachable, last working snapshot ~2020, courses frozen 2019–20 | Unrelated artefact that once carried our name; we note the history and moved on. (Nothing alive collides with the name today.) |
-| **[Prove2Me](https://arxiv.org/abs/2608.28433)** + the [FLT corpus](https://github.com/anthropics/fermats-last-theorem) — Sep 2026 | Coordinate proving agents around a DAG of theorem statements; one statement file and one proof file per theorem, imports = citations by discipline | 29,511 theorems, 1,450 definition modules, 13M lines of Lean; kernel + comparator + nanoda checked, 3 axioms, 0 sorry | Agents propose statements and claim them; the DAG is *construction-time coordination*. A text-only generator computes citations and depth for the docs site | Live, published, the largest machine-written proof in existence. Its own paper lists "how to extract human-legible insight from machine-generated proofs" as **open** | ProofWeb imports the same files (no toolchain) and reproduces six of their published figures exactly, then adds what construction-time coordination has no reason to keep: **273,252 step-level edges** addressed to proof lines, a reverse `uses` index, and an audit that grades its own confidence. Their DAG is statement-level, authenticated, and not exported |
+| **[Prove2Me](https://arxiv.org/abs/2608.28433)** + the [FLT corpus](https://github.com/anthropics/fermats-last-theorem) — Sep 2026 | Coordinate proving agents around a DAG of theorem statements; one statement file and one proof file per theorem, imports = citations by discipline | 29,511 theorems, 1,450 definition modules, 13M lines of Lean; kernel + comparator + nanoda checked, 3 axioms, 0 sorry | Agents propose statements and claim them; the DAG is *construction-time coordination*. A text-only generator computes citations and depth for the docs site | Live, published, the largest machine-written proof in existence. Its own paper lists "how to extract human-legible insight from machine-generated proofs" as **open** | ProofWeb imports the same files (no toolchain) and reproduces six of their published figures exactly, then adds what construction-time coordination has no reason to keep: **276,403 step-level edges** addressed to proof lines, a reverse `uses` index, and an audit that grades its own confidence. Their DAG is statement-level, authenticated, and not exported |
 | **[TheoremGraph](https://arxiv.org/abs/2606.25363)** / theoremsearch.com — Jun 2026 | Join formal (Lean) and informal (arXiv) mathematics into one searchable graph | 388,105 formal declaration nodes, 11.3M typed edges across 25 Lean projects; 11.7M arXiv theorem environments; site + API + MCP | Mechanical extraction (declaration-level) + statistical formal↔informal alignment (~48k confident matches) | Live, published, the most ambitious neighbour | Declaration-level vs our step-level; their informal side is scraped-and-aligned, ours is authored-and-reviewed; we re-verify at extraction |
 | **[Lean Atlas](https://github.com/NyxFoundation/lean-atlas)** — Mar 2026 | Navigable dependency graphs for Lean with 8-way edge typing (dependency in the *type* vs in the *value*) and pruning | Graph tooling + paper | Mechanical, declaration-level | Active research tool | Their edge typing stops exactly one level above proof steps; ours names the step |
 | **[LeanDojo](https://leandojo.org/)** — 2023 | Trace all of mathlib at **tactic level** for machine learning | 122,517 theorems, 259,580 tactics, premises annotated per tactic with positions; shipped as an ML corpus | Mechanical tracing of kernel-checked proofs | The standard ML substrate; our Lean plan is a *converter* for its data, not re-extraction | They ship a training dump; we serve queries over a graph (`uses` = reverse step-level lookup, which nothing serves) and cover Metamath + informal mathematics |

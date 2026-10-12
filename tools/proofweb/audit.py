@@ -77,6 +77,8 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
           jaccard: float = 0.9, top: int = 25, upstream: dict | None = None,
           ) -> AuditReport:
     """Produce the report. ``upstream`` holds published figures to compare against."""
+    if (graph.meta or {}).get("style") == "lake":
+        return audit_lake(graph, top=top)
     upstream = upstream or {}
     report = AuditReport()
     thms = _theorems(graph)
@@ -151,6 +153,11 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
     s.say(_cmp("imported but never named", len(unhit_pairs), upstream.get("unhit")))
     s.say(_cmp("  target is @[simp] (legitimately unnamed)", len(via_simp), None))
     s.say("```")
+    if upstream.get("unhit") and meta.get("hit_mode") != "anthropic":
+        s.say("Upstream counts with its own ASCII-only pattern, which `--hit-mode "
+              "anthropic` reproduces. On the Fermat corpus both modes give upstream's "
+              "number plus the citations named only on `attribute` or `open` lines, "
+              "which this importer does not count as proof script.")
     s.say("A citation with no textual occurrence is not an error: `simp` and other "
           "automation use lemmas without naming them. It is the honest measure of "
           "how much of the graph the *text* alone can account for.")
@@ -278,12 +285,23 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
             (resolved if node_id else unresolved).append(node_id or name)
         closure = ({root} | graph.ancestors(root, ("proof",))) if root and root in graph else set()
         outside = [r for r in resolved if closure and r not in closure]
+        # Upstream's landmark rule counts theorems only, plus the goal.
+        thm_marks = {r for r in resolved if graph.get(r) and graph.get(r).is_theorem}
+        if root and root in graph:
+            thm_marks.add(root)
         s.say("```")
-        s.say(_cmp("landmark names in PROOF-PATH.md", len(names), upstream.get("landmarks")))
+        s.say(_cmp("landmark names in PROOF-PATH.md", len(names), None))
+        s.say(_cmp("  theorems among them, plus the goal", len(thm_marks),
+                   upstream.get("landmarks")))
         s.say(_cmp("  resolved to a node", len(resolved), None))
         s.say(_cmp("  not in this corpus (Mathlib, prose)", len(unresolved), None))
         s.say(_cmp("  resolved but OUTSIDE the goal closure", len(outside), None))
         s.say("```")
+        if upstream.get("landmarks"):
+            s.say(f"Upstream's {upstream['landmarks']} landmarks are theorems named in "
+                  "PROOF-PATH.md *or* in the project's route and overview documents, "
+                  "which are not in the public repository. Applied to the public files "
+                  "alone, their rule gives the theorem count on the line above.")
         if unresolved[:12]:
             s.say("Unresolved: " + ", ".join(unresolved[:12]))
         if outside:
@@ -298,7 +316,8 @@ def audit(graph: Graph, *, root: str | None = None, proof_path_text: str | None 
         s.say(f"Consecutive landmark pairs where the later one does not depend on "
               f"the earlier: {breaks}/{max(len(resolved) - 1, 0)} — expected to be "
               f"non-zero, since a prose route is a narrative, not a chain.")
-        s.data = {"landmarks": len(names), "resolved": len(resolved),
+        s.data = {"landmarks": len(names), "theorem_landmarks": len(thm_marks),
+                  "resolved": len(resolved),
                   "unresolved": unresolved[:50], "outside_closure": outside[:50],
                   "order_breaks": breaks}
 
@@ -365,3 +384,171 @@ def _near_duplicates(thms: Iterable[Node], *, threshold: float,
                     out.append((a_id, b_id, j))
     out.sort(key=lambda r: -r[2])
     return out
+
+
+# ---------------------------------------------------------------------------
+# module-level corpora (ordinary Lake projects)
+# ---------------------------------------------------------------------------
+
+
+def _lean(node: Node) -> dict:
+    return node.provenance.get("lean") or {}
+
+
+def audit_lake(graph: Graph, *, top: int = 25) -> AuditReport:
+    """What can be said about a library read at file granularity.
+
+    Less than for a Prove2Me corpus, and the report says so: an import is an
+    upper bound on dependence, so "rests on" here means "could rest on". The
+    useful questions are still answerable: where the holes are, which
+    catalogued results sit downstream of them, and which results import other
+    results in the same collection.
+    """
+    report = AuditReport()
+    meta = graph.meta or {}
+    mods = [n for n in graph if n.kind == "module"]
+    edges = graph.edges("proof")
+
+    s = report.section("Counts")
+    decls: Counter = Counter()
+    lines = 0
+    external: Counter = Counter()
+    for n in mods:
+        lean = _lean(n)
+        lines += int(lean.get("lines") or 0)
+        decls.update(lean.get("declarations") or {})
+        for x in lean.get("external_imports") or ():
+            external[x.split(".")[0]] += 1
+    s.say("```")
+    s.say(_cmp("modules (source files)", len(mods), None))
+    s.say(_cmp("lines", lines, None))
+    s.say(_cmp("theorems and lemmas", decls["theorem"] + decls["lemma"], None))
+    s.say(_cmp("definitions and other declarations",
+               sum(v for k, v in decls.items() if k not in ("theorem", "lemma")), None))
+    s.say(_cmp("project import edges", len(edges), None))
+    s.say(_cmp("parse problems", meta.get("problem_count", 0), None))
+    s.say("```")
+    s.say(f"Read at `{meta.get('granularity', 'module')}` granularity; edges derived by "
+          f"`{meta.get('derivation', '?')}`. Checked by: {meta.get('checked_by', 'unknown')}. "
+          f"Toolchain `{meta.get('toolchain') or '?'}`.")
+    if external:
+        s.say("External libraries imported (by number of importing files): "
+              + ", ".join(f"{k} {v}" for k, v in external.most_common(10)))
+    s.data = {"modules": len(mods), "lines": lines, "declarations": dict(decls),
+              "import_edges": len(edges), "external": dict(external.most_common(20)),
+              "problems": meta.get("problem_count", 0)}
+
+    s = report.section("Holes")
+    challenges = set(meta.get("challenge_modules") or ())
+    all_sorry = sorted(n.id for n in mods if _lean(n).get("sorry"))
+    # A Comparator challenge states a theorem and ends in a deliberate sorry;
+    # that is the format, not a hole. It matters only if a proof imports it.
+    by_design = [m for m in all_sorry if m in challenges]
+    sorry_mods = [m for m in all_sorry if m not in challenges]
+    native_mods = sorted(n.id for n in mods if _lean(n).get("native_decide"))
+    axioms = sorted(f"{n.id}: {a}" for n in mods if n.id not in challenges
+                    for a in _lean(n).get("axioms") or ())
+    challenge_axioms = sorted(f"{n.id}: {a}" for n in mods if n.id in challenges
+                              for a in _lean(n).get("axioms") or ())
+    s.say("```")
+    s.say(_cmp("modules containing sorry/admit", len(sorry_mods), None))
+    s.say(_cmp("  occurrences", sum(int(_lean(n).get("sorry") or 0)
+                                    for n in mods if n.id in set(sorry_mods)), None))
+    s.say(_cmp("Comparator challenge files (sorry by design)", len(by_design), None))
+    s.say(_cmp("modules using native_decide", len(native_mods), None))
+    s.say(_cmp("axiom declarations", len(axioms), None))
+    s.say(_cmp("  in challenge files (statement side)", len(challenge_axioms), None))
+    s.say("```")
+    for line in sorry_mods[:top]:
+        s.say(f"- sorry: {line}")
+    for line in axioms[:top]:
+        s.say(f"- axiom: {line}")
+    s.say("Counted in comment-stripped text. A `sorry` in an imported file does not by "
+          "itself make a result unproved; only a kernel check of that result settles it.")
+    s.data = {"sorry_modules": sorry_mods, "challenge_sorry": by_design,
+              "native_decide_modules": native_mods, "axioms": axioms,
+              "challenge_axioms": challenge_axioms}
+
+    s = report.section("Catalogued results")
+    results = list(meta.get("main_results") or [])
+    resolved = [r for r in results if r.get("module_found")]
+    declared = [r for r in results if r.get("declaration_found")]
+    with_cfg = [r for r in results if r.get("comparator_config")]
+    nanoda = [r for r in results if r.get("nanoda")]
+    standard = {"propext", "Quot.sound", "Classical.choice"}
+    extra_ax = [r for r in results if set(r.get("permitted_axioms") or ()) - standard]
+    s.say("```")
+    s.say(_cmp("main results in formalization.yaml", len(results), None))
+    s.say(_cmp("  file found in the library", len(resolved), None))
+    s.say(_cmp("  declaration found in that file", len(declared), None))
+    s.say(_cmp("  with a Comparator configuration", len(with_cfg), None))
+    s.say(_cmp("    of which nanoda enabled", len(nanoda), None))
+    s.say(_cmp("    permitting axioms beyond the standard three", len(extra_ax), None))
+    claimed = [r for r in results if r.get("claimed")]
+    if claimed:
+        s.say(_cmp("  with self-reported sorry/axiom claims", len(claimed), None))
+    s.say("```")
+    redirected = [r for r in results if r.get("proof_module") not in (None, r.get("module"))]
+    if redirected:
+        s.say(f"{len(redirected)} catalogue entr{'y points' if len(redirected) == 1 else 'ies point'} "
+              "at a Comparator challenge (the statement); the proof module named in "
+              "its configuration is used instead.")
+    if meta.get("review_status") is not None:
+        s.say(f"The catalogue's own review status: `{meta['review_status']}`.")
+    s.say("A Comparator configuration says how a result *can* be checked against its "
+          "stated form. Whether that check was run, and passed, is not recorded here.")
+    s.data = {"main_results": len(results), "resolved": len(resolved),
+              "declared": len(declared), "comparator": len(with_cfg),
+              "nanoda": len(nanoda), "extra_axioms": [r["declaration"] for r in extra_ax],
+              "review_status": meta.get("review_status")}
+
+    s = report.section("Results resting on other results")
+    main_mods: dict[str, list[str]] = defaultdict(list)
+    for r in resolved:
+        main_mods[r.get("proof_module") or r["module"]].append(r["declaration"])
+    # Every sorry counts here, a challenge's included: a proof that imports a
+    # file ending in sorry is exactly the case worth flagging.
+    sorry_set = set(all_sorry)
+    rests: dict[str, list[str]] = {}
+    holes_below: dict[str, int] = {}
+    for mod in sorted(main_mods):
+        closure = graph.ancestors(mod, ("proof",))
+        others = sorted(m for m in closure if m in main_mods and m != mod)
+        if others:
+            rests[mod] = others
+        below = len((closure | {mod}) & sorry_set)
+        if below:
+            holes_below[mod] = below
+    s.say("```")
+    s.say(_cmp("result modules importing another result module", len(rests), None))
+    s.say(_cmp("result modules with sorry in their import closure",
+               len(holes_below), None))
+    s.say("```")
+    for mod, others in sorted(rests.items(), key=lambda kv: (-len(kv[1]), kv[0]))[:top]:
+        s.say(f"- {mod} imports {len(others)} other result module(s): "
+              + ", ".join(others[:4]) + (" ..." if len(others) > 4 else ""))
+    for mod, k in sorted(holes_below.items(), key=lambda kv: (-kv[1], kv[0]))[:top]:
+        s.say(f"- {mod}: {k} module(s) with sorry in its import closure")
+    s.say('"Imports" is the honest verb: a result module importing another may use '
+          "it, or may only share infrastructure with it. Term-level extraction would "
+          "say which.")
+    s.data = {"rests_on_other_results": rests, "sorry_in_closure": holes_below}
+
+    s = report.section("Shape")
+    depth = graph.depths(("proof",))
+    acyclic = all(d >= 0 for d in depth.values())
+    deepest = max(depth, key=depth.get) if depth else None
+    indeg: Counter = Counter(e.dst for e in edges)
+    s.say("```")
+    s.say(_cmp("acyclic", int(acyclic), None))
+    if deepest:
+        s.say(_cmp("longest import chain", depth[deepest], None) + f"   ({deepest})")
+    s.say("```")
+    s.say("**Most-imported modules:**")
+    s.say("```")
+    for mod, k in indeg.most_common(top):
+        s.say(f"  {k:>6}  {mod}")
+    s.say("```")
+    s.data = {"acyclic": acyclic, "longest_chain": depth.get(deepest, 0) if deepest else 0,
+              "deepest": deepest, "most_imported": indeg.most_common(top)}
+    return report

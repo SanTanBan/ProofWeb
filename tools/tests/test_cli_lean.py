@@ -67,6 +67,8 @@ def test_cli_stats_says_who_did_the_checking(p2m_repo, tmp_path, capsys):
     assert main(["stats", "--json", str(out)]) == 0
     text = capsys.readouterr().out
     assert "verified  5/6" in text
+    # A machine check somewhere else is not two people reading it here.
+    assert "reviewed         0/6" in text
     # `verified` must never read as "proofweb checked this".
     assert "0 replayed here" in text and "edges derived by `imports`" in text
 

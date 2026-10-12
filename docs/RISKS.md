@@ -360,9 +360,9 @@ Three specific ways this could mislead, and what is done about each:
    corpus corroborates it — but the guarantee is social, not kernel-enforced,
    and calling it exact would be an overclaim. Statement/proof *identity* is
    kernel-enforced by `p2m_exact_reverting`; the citation set is not.
-3. **Line attribution is text, and text is not elaboration.** 81.5% of
-   attributed occurrences carry the theorem's own namespace and are
-   near-certain; 3.5% are field notation, where the prefix is a term and the
+3. **Line attribution is text, and text is not elaboration.** 81.1% of the
+   citations found in the text carry the theorem's own namespace and are
+   near-certain; 4.0% are field notation, where the prefix is a term and the
    match cannot be verified from text at all. The audit prints that
    distribution rather than a single accuracy figure, because a single figure
    would be invented. Only the term-level extraction in the roadmap can settle

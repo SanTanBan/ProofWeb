@@ -373,8 +373,10 @@ def usage_regex(short_names: Iterable[str], mode: HitMode = "strict") -> re.Patt
             r"(?<![A-Za-z0-9_.'])(?P<prefix>(?:[A-Za-z0-9_.']*\.)?)"
             rf"(?P<name>{alt})(?![A-Za-z0-9_'])"
         )
+    # A leading dot is field notation on a term that is not an identifier,
+    # e.g. `(hv.pow _).isInvertible_invModule`; without it that use is invisible.
     return re.compile(
-        rf"(?<![{IDENT_CHARS}.])(?P<prefix>(?:[{IDENT_CHARS}]+\.)*)"
+        rf"(?<![{IDENT_CHARS}.])(?P<prefix>\.?(?:[{IDENT_CHARS}]+\.)*)"
         rf"(?P<name>{alt})(?![{IDENT_CHARS}])"
     )
 
@@ -394,6 +396,8 @@ def hit_form(prefix: str, qualified: str,
     ``bare-unopened``
         No prefix and no reason for the name to resolve here. Weakest.
     """
+    if prefix.startswith("."):
+        return "dot"              # field notation on a parenthesised term
     pre = prefix[:-1] if prefix.endswith(".") else prefix
     if pre.startswith("_root_"):
         pre = pre[len("_root_"):].lstrip(".")

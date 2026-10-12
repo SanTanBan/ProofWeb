@@ -189,6 +189,9 @@ def cmd_import_lean(args: argparse.Namespace) -> int:
     """
     import time
 
+    if args.style == "lake":
+        return _import_lake(args)
+
     from .leanp2m import extract_dir
 
     started = time.perf_counter()
@@ -222,6 +225,39 @@ def cmd_import_lean(args: argparse.Namespace) -> int:
     out = Path(args.out)
     _write_json(nodes_to_json(list(graph), module=nodes[0].module if nodes else "empty",
                               source=Path(args.directory).name, meta=meta),
+                out, compact=len(graph) > 5000)
+    say(f"wrote {out} in {time.perf_counter() - started:.1f}s")
+    return 0
+
+
+def _import_lake(args: argparse.Namespace) -> int:
+    """An ordinary Lake project, read at module granularity. Claims nothing checked."""
+    import time
+
+    from .leanlake import extract_dir
+
+    started = time.perf_counter()
+    project, nodes, meta = extract_dir(args.directory, libs=args.lib or None,
+                                       limit=args.limit, module=args.module)
+    graph = Graph(nodes, meta=meta)
+    say = lambda m: print(m, file=sys.stderr)
+    holes = sum(1 for n in graph if "sorry" in n.tags)
+    results = meta["main_results"]
+    say(f"imported {len(graph)} modules from {args.directory} "
+        f"(libraries: {', '.join(project.libs) or 'all .lean files'})")
+    say(f"  {len(graph.edges('proof'))} project import edges; "
+        f"{holes} module(s) contain sorry/admit")
+    if results:
+        say(f"  {len(results)} catalogued main results, "
+            f"{sum(1 for r in results if r['declaration_found'])} located in their files")
+    say("  every node is draft: module granularity, nothing checked by proofweb")
+    if project.problems:
+        say(f"  {len(project.problems)} problem(s); first few:")
+        for code, path, message in project.problems[:5]:
+            say(f"    {code}: {path} — {message}")
+    out = Path(args.out)
+    _write_json(nodes_to_json(list(graph), module=nodes[0].module if nodes else "empty",
+                              source=meta["corpus"], meta=meta),
                 out, compact=len(graph) > 5000)
     say(f"wrote {out} in {time.perf_counter() - started:.1f}s")
     return 0
@@ -384,13 +420,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("directory", help="corpus root, e.g. corpora/fermats-last-theorem")
     p.add_argument("-o", "--out", required=True,
                    help="output JSON path (.json or .json.gz)")
-    p.add_argument("--style", choices=["p2m"], default="p2m",
-                   help="corpus layout (only Prove2Me is supported so far)")
+    p.add_argument("--style", choices=["p2m", "lake"], default="p2m",
+                   help="corpus layout: 'p2m' (Prove2Me: one statement and one "
+                        "proof file per theorem; citation-level edges) or 'lake' "
+                        "(any Lake project; module-level import edges, all draft)")
+    p.add_argument("--lib", action="append", metavar="ROOT",
+                   help="lake style: library root(s) to read, e.g. OAI "
+                        "(default: every lean_lib in the lakefile)")
     p.add_argument("--root", default=None, metavar="ID",
                    help="the corpus's goal theorem, e.g. fermat_last_theorem")
     p.add_argument("--module", default=None, help="override the module name")
     p.add_argument("--limit", type=int, default=None,
-                   help="stop after this many theorem files (for dev loops)")
+                   help="stop after this many theorem (p2m) or module (lake) "
+                        "files, for dev loops")
     p.add_argument("--no-usage-lines", action="store_true",
                    help="record statement-level citations only, without "
                         "attributing them to proof-script lines")

@@ -170,3 +170,41 @@ def test_limit_reads_a_prefix_of_the_corpus(p2m_repo):
     thms = [n for n in nodes if n.is_theorem]
     assert len(thms) == 2
     assert not corpus.problems
+
+
+def test_a_cited_name_in_another_cited_names_qualifier_is_still_found(p2m_repo):
+    """`A.left.useLeft` names *two* cited theorems, and `(h2).left` is field
+    notation on a parenthesised term. A single combined pattern used to let
+    the first be swallowed as the second's qualifier, and never matched the
+    third at all; upstream's per-name patterns found both. Found on the real
+    FLT corpus: `exact (hv.pow _).isInvertible_invModule.tensor`."""
+    from proofweb.leanp2m import load_corpus, scan_usages
+    path = p2m_repo / "P2M" / "Sol" / "S_C_root.lean"
+    path.write_text(path.read_text(encoding="utf-8").replace(
+        "  exact left (f.x + g.x) h1",
+        "  have h3 := A.left.useLeft\n  have h4 := (h2).left\n  exact left (f.x + g.x) h1"),
+        encoding="utf-8")
+    corpus = load_corpus(p2m_repo)
+    sol = corpus.sols["C_root"]
+    line = {text.strip(): n for n, text in sol.body}
+    for mode in ("strict", "anthropic"):
+        by_line, _ = scan_usages(sol, corpus, ["B_useLeft", "A_left", "D_dup"], mode=mode)
+        assert by_line[line["have h3 := A.left.useLeft"]] == {
+            "A_left": "qualified", "B_useLeft": "dot"}, mode
+        assert by_line[line["have h4 := (h2).left"]] == {"A_left": "dot"}, mode
+
+
+def test_explicit_universes_are_not_part_of_the_name(tmp_path):
+    """`theorem A.b.{u, v} ...` names `A.b`. Capturing up to the brace gave
+    `A.b.`, an empty short name that no proof can be found to mention; 160 FLT
+    citations were reported as never named because of it."""
+    from proofweb.leanp2m import parse_thm
+    p = tmp_path / "Thm_A_b.lean"
+    p.write_text(
+        "import P2M.Sol.S_A_b\n\n"
+        "theorem A.b.{u, v} {K : Type u} {F : Type v} (x : K) :\n"
+        "    x = x := by p2m_exact_reverting @_root_.P2MW.S_A_b.solution\n",
+        encoding="utf-8")
+    t = parse_thm(p)
+    assert t.qualified == "A.b"
+    assert not t.signature.lstrip().startswith("{u")

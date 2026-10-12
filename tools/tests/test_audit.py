@@ -84,6 +84,7 @@ def test_audit_landmarks_resolve_external_and_unresolved(p2m_repo):
     data = sect(report, "Landmark route").data
     assert data["landmarks"] == 6
     assert data["resolved"] == 4                    # A.left, B.useLeft, C.root, Def_Foo
+    assert data["theorem_landmarks"] == 3           # upstream's rule: theorems + the goal
     assert set(data["unresolved"]) == {"Nat.add_zero", "Nope.missing"}
     assert data["outside_closure"] == []            # every landmark is load-bearing
 

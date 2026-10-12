@@ -15,7 +15,9 @@ import re
 from dataclasses import dataclass, field
 from typing import Iterable, Iterator, Literal
 
-NodeKind = Literal["axiom", "definition", "background", "theorem"]
+#: ``module`` is a source file of a formal library imported at file granularity.
+#: Its single ``imports`` step is an upper bound on dependence, never a proof.
+NodeKind = Literal["axiom", "definition", "background", "theorem", "module"]
 EdgeKind = Literal["proof", "vocabulary"]
 
 #: Justification tokens that refer to something local to the proof and therefore

@@ -17,10 +17,17 @@ LINK = re.compile(r"(?<!\!)\[[^\]]*\]\(([^)]+)\)")
 SKIP_PREFIXES = ("http://", "https://", "mailto:", "#", "<")
 
 
+#: Directories that hold things this repository does not ship: downloaded
+#: corpora (their links point at files a sparse clone leaves out), build output,
+#: and the gitignored private folder. Only the project's own prose is checked.
+EXCLUDED_TOP = {"corpora", "build", "Applications", "scratch", ".venv", "venv"}
+
+
 def markdown_files() -> list[Path]:
     return [
         p for p in REPO_ROOT.rglob("*.md")
-        if ".git" not in p.parts and "build" not in p.parts and "node_modules" not in p.parts
+        if p.relative_to(REPO_ROOT).parts[0] not in EXCLUDED_TOP
+        and ".git" not in p.parts and "node_modules" not in p.parts
     ]
 
 

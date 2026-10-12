@@ -15,8 +15,8 @@
     },
 
     "kind": {
-      "enum": ["axiom", "definition", "background", "theorem"],
-      "description": "axiom: assumed, no proof. definition: introduces vocabulary, no proof. background: logical/meta principle assumed by the ambient logic (equality, substitution). theorem: must carry a proof."
+      "enum": ["axiom", "definition", "background", "theorem", "module"],
+      "description": "axiom: assumed, no proof. definition: introduces vocabulary, no proof. background: logical/meta principle assumed by the ambient logic (equality, substitution). theorem: must carry a proof. module: a source file of a formal library imported at file granularity; it may carry one 'imports' step, an upper bound on dependence, never a proof."
     },
 
     "title": { "type": "string", "minLength": 1 },
@@ -115,7 +115,11 @@
         },
         "step_attribution": {
           "enum": ["kernel", "textual", "human", "none"],
-          "description": "How each citation was placed on a particular step. `textual` means a name was found in the proof script, which is evidence and not proof."
+          "description": "How each citation was placed on a particular step. `textual` means a name was found in the proof script, which is evidence and not proof. `none`: no step-level attribution was attempted."
+        },
+        "granularity": {
+          "enum": ["step", "statement", "module"],
+          "description": "What one edge connects. `module`: a file imports a file, which bounds dependence from above and says nothing about which theorem uses which."
         },
         "checked_by": {
           "type": "string",

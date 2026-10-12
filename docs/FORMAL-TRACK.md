@@ -197,34 +197,51 @@ unit means two independently written parsers agree about 13 million lines:
 | theorems outside that closure | 22 | 22 | match |
 | of those, cited by nobody | 19 | 19 | match |
 
-Plus what only the step-level view can say: **273,252 step-level proof edges**,
+Plus what only the step-level view can say: **276,403 step-level proof edges**,
 each addressed to a line of a named proof file, and 129,505 theorem → definition
 citations that upstream's count does not include. Import takes about twelve
 minutes single-threaded; the audit under a minute.
 
 **Two figures do not match, and they are the more instructive half.**
 
-*Citations never named in the proof script.* Upstream reports 2,890. ProofWeb's
-default `--hit-mode strict` reports 3,644, because its identifier pattern is
-Unicode-aware and theirs is ASCII-only, so the two disagree wherever a name
-touches `ℕ`, `₀` and the like. `--hit-mode anthropic` uses their exact pattern
-and lands at 3,142 — closer, and still 252 above. The residue is a difference in
-which lines count as proof script (this importer excludes `attribute`, `open`
-and other non-proof lines, which upstream's body region does not). Neither
-number is wrong; they measure slightly different things, which is why both modes
-exist and why the audit prints DIFFERS rather than quietly picking one.
+*Citations never named in the proof script.* Upstream reports 2,890. This page
+first reported 3,644 and blamed Unicode-aware matching, then 3,142 under
+upstream's own pattern and blamed which lines count as proof script. A
+pair-by-pair replay of upstream's generator (`tools/docs-site/gen/extract.py`)
+showed both explanations were mostly wrong, and found two bugs in this importer
+instead:
 
-*Landmark names in PROOF-PATH.md.* Upstream reports 49; the same two regexes
-over the same file give 52 here. The extra three are bare namespace names used
-as prose (`ModularCurve`, `AlgebraicGeometry`) and a literal `X.y` placeholder,
-which their generator evidently filters. This was left as a recorded difference
-rather than tuned away: a match obtained by adjusting a filter until the number
-agrees would establish nothing, whereas an explained difference of three
-establishes that both tools are reading the same file.
+1. One combined pattern finds non-overlapping matches, so a cited name used as
+   the qualifier of another cited name was swallowed. In
+   `exact (hv.pow _).isInvertible_invModule.tensor`, all three of `pow`,
+   `isInvertible_invModule` and `tensor` are cited, and the middle one vanished.
+   The default mode also never matched field notation after a parenthesis.
+2. A theorem declared with explicit universes, `theorem A.b.{u, v}`, was read as
+   `A.b.`, an empty short name that no proof can be found to mention.
+
+Both are fixed, with regression tests. Replaying upstream's rule on the public
+files now gives exactly 2,890. ProofWeb counts 2,919 citations never named, in
+either matching mode. Each of the 29 extra is named only on an `attribute` or
+`open` line, which this importer deliberately does not count as proof script,
+and none goes the other way.
+
+*Landmarks.* Upstream reports 49 and ProofWeb listed 52, and an earlier version
+of this page explained the gap as three prose names their generator filters.
+That was a guess, and reading their generator (`tools/docs-site/gen/graphdata.py`)
+showed it to be wrong. The two numbers count different things. ProofWeb's 52 is
+every distinct backticked name in `PROOF-PATH.md` (48) plus the definition files
+it names (4). Upstream's 49 is *theorems* named in `PROOF-PATH.md` or in the
+project's `docs/route.md` and `docs/overview.md`, plus the goal, and that
+`docs/` folder is not in the public repository. Their rule applied to the public
+files gives 35, which is exactly the number of theorem landmarks ProofWeb
+resolves; the other 14 cannot be reproduced by anyone outside the project. The
+audit now prints the like-for-like count and says why it differs from 49.
 
 The general rule this follows: **an audit that can only report agreement is not
 an audit.** Every count carries `match` or `DIFFERS by ±n`, and the two that
-differ are documented here rather than in a footnote.
+differ are documented here rather than in a footnote. Chasing them down found two
+bugs in this importer. Adjusting a filter until the numbers agreed would have
+hidden both.
 
 ### What an imported node claims
 
@@ -254,12 +271,12 @@ Three claims of different strength, kept apart on purpose:
    are transitive, so a proof *could* use something it does not directly import;
    the Prove2Me discipline says it does not, and the audit's "never named" column
    is the measure of how far the text alone corroborates that.
-3. **Line attribution is textual, and graded.** Of 103,214 attributed
-   occurrences in the FLT corpus, **81.5% are `qualified`** (the occurrence
-   carried the theorem's own namespace — near-certain), 14.9% `bare-open`
-   (unqualified, but the namespace is open here), 3.5% `dot` (field notation,
-   where the prefix is a term and the match cannot be verified from text at all),
-   and 0.1% `bare-unopened`. Only a term-level extraction can settle the last
+3. **Line attribution is textual, and graded.** Each of the 103,934 citations
+   found in the FLT proof scripts is graded by its strongest occurrence:
+   **81.1% `qualified`** (it carried the theorem's own namespace, near-certain),
+   14.9% `bare-open` (unqualified, but the namespace is open here), 4.0% `dot`
+   (field notation, where the prefix is a term and the match cannot be verified
+   from text at all), and 0.1% `bare-unopened`. Only a term-level extraction can settle the last
    two categories — which is what §3b is for.
 
 A `claim` on an imported step is **a line of a proof script, not an asserted
@@ -298,6 +315,88 @@ this pipeline, not this corpus.** Every proof in it was written by Claude agents
 The kernel does not care who wrote a proof, and neither does the importer — but
 a project that advertises a mechanical pipeline should say exactly where that
 boundary falls.
+
+### Ordinary Lake projects, at module level (built)
+
+Most formal corpora are not laid out like Prove2Me. OpenAI's
+[`math`](https://github.com/openai/math) repository, its
+[`NavierStokesAndEuler`](https://github.com/openai/NavierStokesAndEuler) and
+Buckmaster and Alpöge's [`fluid_lean`](https://github.com/tristanbuckmaster/fluid_lean)
+are ordinary Lake projects: one file declares many theorems, and a file's
+imports say which *files* it may use, not which theorems it does use. Text alone
+cannot recover citation-level edges there, so
+[`tools/proofweb/leanlake.py`](../tools/proofweb/leanlake.py) claims exactly what
+text supports and no more:
+
+- one node per source file, of kind `module`, found through the lakefile's
+  `lean_lib` declarations (including `srcDir`, which `fluid_lean` uses to vendor
+  libraries);
+- one `imports` step per node, labelled as *an upper bound on logical
+  dependence, not a record of use* — the validator rejects any other step on a
+  module node;
+- `status: draft` on every node, `granularity: module`, and a `checked_by` that
+  says ProofWeb ran no Lean;
+- holes counted in comment-stripped text: `sorry`/`admit`, `native_decide`,
+  `axiom` declarations.
+
+```bash
+python -m proofweb import-lean ../corpora/NavierStokesAndEuler --style lake \
+    -o ../build/nse.json
+python -m proofweb audit --json ../build/nse.json --report ../build/nse-audit.md
+```
+
+What makes this more than `lake` already shows is the **catalogue**. These
+projects follow the community
+[`formalization.yaml`](https://github.com/mathlib-initiative/formalization.yaml)
+schema, which lists each main result by declaration and file, often with a
+[Comparator](https://github.com/leanprover/comparator) configuration that pairs a
+*challenge* module (the statement alone) with a *solution* module (the proof).
+The importer locates every catalogued result, and the audit asks of each one:
+which other catalogued results sit in its import closure, and does any file in
+that closure contain a `sorry`?
+
+Two conventions had to be learned from the real corpora rather than assumed:
+
+1. **A challenge file ends in `sorry` by design.** It states the theorem over
+   Mathlib alone so Comparator can check the proof against it. The first run
+   reported every challenge as a hole; the audit now lists them separately and
+   flags a challenge only if some proof imports it.
+2. **A catalogue may point at the challenge, not the proof.** All three
+   `fluid_lean` entries name `Challenge.lean`. The result is resolved to the
+   solution module its Comparator configuration names, and the audit says so.
+
+Self-reported fields in a catalogue entry, such as `sorry_count: 0`, are kept as
+`claimed` and never merged with what was measured.
+
+| Corpus | Modules | Theorems and lemmas | Import edges | `sorry` outside challenges | Catalogued results | Catalogue's own review status |
+|---|---:|---:|---:|---:|---:|---|
+| `NavierStokesAndEuler` @f9e8bc5 | 2,659 | 37,189 | 6,105 | 0 | 4 | `self-assessed` |
+| `fluid_lean/affinecore` @d012468 | 1,180 | 16,439 | 6,119 | 0 | 1 | `unreviewed` |
+| `fluid_lean/boussinesq-blowup` | 1,452 | 22,709 | 7,041 | 0 | 1 | `unreviewed` |
+| `fluid_lean/euler-blowup` | 1,113 | 29,244 | 5,059 | 0 | 1 | `author-verified` |
+| `openai/math` `lean/` @fd4aeeb | 122,875 | 2,238,781 | 278,492 | 0 | 200 | `unchecked` |
+
+Every catalogued result in the four Navier–Stokes projects resolves to a file
+that declares it, every one has a Comparator configuration with `nanoda`
+enabled and only the three standard axioms permitted, and no result has a
+`sorry` anywhere in its import closure. That is what text can establish.
+Whether Comparator was run, and passed, is not recorded in any of these
+repositories, so the audit does not say it was.
+
+`openai/math` is a different scale: 26 million lines in one library. Its formal
+half is clean at the level text can see. All 412 files containing `sorry` are
+Comparator challenge statements, out of 416 configurations, and no proof
+imports one. The one `axiom` is a challenge stating its claim. There is no
+`native_decide`. All 200 catalogued results resolve to a file; 197 declare the
+catalogued name as text, and the three that do not are listed as problems. Two
+facts deserve a reader's attention. Only 3 of the 200 Comparator configurations
+enable `nanoda`, the independent second checker. And ten result modules import
+another result's module, so some results rest on other model-written results;
+which ones actually *use* them is a term-level question. The catalogue's own
+review status is `unchecked`. And none of this reaches the 58% of the
+collection's results that have no Lean formalization. None of the three
+manuscripts withdrawn on 7 October 2026, after a sign error in one broke two
+papers that depended on it, appears in the Lean catalogue.
 
 ## 3b. Lean, part two: term-level extraction (designed; needs a toolchain)
 

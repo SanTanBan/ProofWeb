@@ -178,6 +178,9 @@ def _line_of(text: str, offset: int) -> int:
     return text.count("\n", 0, offset) + 1
 
 
+_THM_NAME = re.compile(r"\s*(«[^»]*»|[^\s{(\[:]+?)(\.\{[^}]*\})?(?=[\s{(\[:]|$)")
+
+
 def parse_thm(path: Path, corpus: Corpus | None = None, root: Path | None = None) -> ThmFile | None:
     """Read a statement file, anchored on its mandatory solution tail."""
     raw = _read(path)
@@ -205,7 +208,10 @@ def parse_thm(path: Path, corpus: Corpus | None = None, root: Path | None = None
         tracker.feed(line)
 
     after = text[head_start.end():]
-    name_m = re.match(rf"\s*(«[^»]*»|[^\s{{(\[:]+)", after)
+    # The name may carry explicit universes, `A.b.{u, v}`. They are not part of
+    # the name: capturing up to the brace left `A.b.` with an empty short name,
+    # which no proof can ever be found to mention.
+    name_m = _THM_NAME.match(after)
     declared = name_m.group(1) if name_m else stem
     qualified = tracker.qualify(declared)
 
@@ -436,15 +442,29 @@ def scan_usages(sol: SolFile, corpus: Corpus, cited_thms: Iterable[str],
     rank = {"qualified": 3, "bare-open": 2, "dot": 1, "bare-unopened": 0}
     by_line: dict[int, dict[str, str]] = {}
     best: dict[str, str] = {}
+
+    def record(lineno: int, name: str, prefix: str) -> None:
+        for node_id, qualified in short_to_ids.get(name, ()):
+            form = hit_form(prefix, qualified, sol.current_ns, sol.opened)
+            slot = by_line.setdefault(lineno, {})
+            if node_id not in slot or rank[form] > rank[slot[node_id]]:
+                slot[node_id] = form
+            if node_id not in best or rank[form] > rank[best[node_id]]:
+                best[node_id] = form
+
     for lineno, text in sol.body:
         for m in pattern.finditer(text):
-            for node_id, qualified in short_to_ids.get(m.group("name"), ()):
-                form = hit_form(m.group("prefix"), qualified, sol.current_ns, sol.opened)
-                slot = by_line.setdefault(lineno, {})
-                if rank[form] > rank.get(slot.get(node_id, "bare-unopened"), -1) or node_id not in slot:
-                    slot[node_id] = form
-                if rank[form] > rank.get(best.get(node_id, "bare-unopened"), -1) or node_id not in best:
-                    best[node_id] = form
+            prefix = m.group("prefix")
+            record(lineno, m.group("name"), prefix)
+            # One alternation finds non-overlapping matches, so a cited name
+            # used as the qualifier of another (`A.left.useLeft`) would be
+            # swallowed by it. Credit every component of the qualifier too,
+            # with the components before it as its own qualifier.
+            parts = prefix.split(".")[:-1]
+            for i, part in enumerate(parts):
+                if part in short_to_ids:
+                    head = ".".join(parts[:i])
+                    record(lineno, part, (head + ".") if i else "")
     return by_line, best
 
 
@@ -483,8 +503,10 @@ def build_nodes(corpus: Corpus, *, module: str, source: str,
 
         if sol is not None:
             cited_thms, cited_defs, external = cite_targets(sol)
-            cited_thms = [c for c in cited_thms if c in corpus.thms]
-            cited_defs = [c for c in cited_defs if c in corpus.defs]
+            # A few proof files import the same theorem twice; a citation is
+            # a pair, so count it once (upstream's generator does the same).
+            cited_thms = list(dict.fromkeys(c for c in cited_thms if c in corpus.thms))
+            cited_defs = list(dict.fromkeys(c for c in cited_defs if c in corpus.defs))
             by_line, forms = scan_usages(sol, corpus, cited_thms, mode=hit_mode)
 
         def_ids = [f"Def_{d}" for d in cited_defs]

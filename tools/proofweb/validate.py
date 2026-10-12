@@ -234,7 +234,14 @@ def check_kind_obligations(graph: Graph, report: Report) -> None:
             report.add("error", "kind.no-proof", node.id,
                        "declared as a theorem but carries no proof steps",
                        node.source_path)
-        if not node.is_theorem and node.steps:
+        if node.kind == "module":
+            # A module carries at most one step: the file's imports. Anything
+            # else would be dressing an import list up as a proof.
+            if any(st.sid != "imports" for st in node.steps) or len(node.steps) > 1:
+                report.add("error", "kind.module-steps", node.id,
+                           "a module node may carry only its single 'imports' step",
+                           node.source_path)
+        elif not node.is_theorem and node.steps:
             report.add("error", "kind.unexpected-proof", node.id,
                        f"kind '{node.kind}' must not carry a proof",
                        node.source_path)

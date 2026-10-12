@@ -148,11 +148,17 @@ Added when the project pivoted to mechanistic extraction; see
       proof turned out to be importable with no Lean toolchain at all, because
       the Prove2Me layout makes a proof's imports its citations. Six published
       figures reproduced exactly; see [FORMAL-TRACK.md](FORMAL-TRACK.md) §3a.
-- [ ] **Import the other two AI-written corpora.** `openai/NavierStokesAndEuler`
-      and `tristanbuckmaster/fluid_lean` are ordinary lake projects, not
-      Prove2Me, so their imports are file-level rather than citation-level: a
-      `--style lake` mode, module-granularity, `status: draft`. Smaller value
-      than FLT and a day of work.
+- [x] **Import the other AI-written corpora.** Done as `import-lean --style
+      lake`: any Lake project at module granularity, every node `draft`, with
+      the `formalization.yaml` catalogue and Comparator configurations read so
+      the audit can say which catalogued results rest on others and which have
+      a `sorry` below them. Run on `NavierStokesAndEuler`, the three
+      `fluid_lean` projects and `openai/math`; see
+      [FORMAL-TRACK.md](FORMAL-TRACK.md) §3a.
+- [ ] **Theorem-level edges for Lake projects.** Module imports are an upper
+      bound. Getting from "file A may use file B" to "theorem X uses theorem Y"
+      needs the term-level extraction below; no amount of text parsing gets
+      there honestly.
 - [ ] **`leandojo-to-proofweb` converter.** LeanDojo already extracts
       tactic-level premises from mathlib; converting its traced format into
       this repository's extracted-JSON puts `uses`/`why`/the viewer over
@@ -162,7 +168,7 @@ Added when the project pivoted to mechanistic extraction; see
       is the single most valuable thing an outside contributor could pick up.
 - [ ] **Measure the text against the kernel.** The FLT import attributes
       citations to proof lines *textually*, and grades each occurrence
-      (81.5% fully qualified, 3.5% field notation that text cannot resolve at
+      (81.1% fully qualified, 4.0% field notation that text cannot resolve at
       all). Building a sample of low-closure theorems with `lake build
       Theorems.Thm_X` and comparing the textual `by` lists against the kernel's
       constants would turn that grading into a measured precision and recall.

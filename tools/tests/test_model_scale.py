@@ -144,3 +144,22 @@ def test_full_report_over_a_large_graph_is_fast(n_nodes, fanout):
     assert sum(len(v) for v in layers.values()) == n_nodes
     assert sizes[f"n{n_nodes - 1}"] == n_nodes - 1
     assert elapsed < 10.0, f"layers+closure_sizes took {elapsed:.1f}s"
+
+
+def test_stats_stays_readable_at_corpus_scale():
+    """A layer of a real corpus holds thousands of names; `stats` printed all of
+    them, 1.1 MB for the FLT corpus. Each list is now capped and counted."""
+    from proofweb.render import summarise
+    from proofweb.model import Graph, Node
+    leaves = [Node(id=f"L{i}", kind="axiom", title=f"L{i}", statement_natural="x")
+              for i in range(500)]
+    text = summarise(Graph(leaves))
+    assert "(+492 more)" in text
+    assert len(text) < 2000
+
+
+def test_stats_summarises_the_middle_of_a_deep_graph():
+    from proofweb.render import summarise
+    text = summarise(chain(40))
+    assert "30 more layers (depths 5-34)" in text
+    assert "depth 39" in text and "depth 20 " not in text

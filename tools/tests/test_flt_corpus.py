@@ -31,14 +31,16 @@ UPSTREAM = {
     "in_closure": 29489,
     "outside": 22,
     "uncited": 19,
-    # Upstream reports 49. We extract 52 from the same file with the same two
-    # regexes; the difference is a handful of bare namespace names used as prose
-    # (`ModularCurve`, `AlgebraicGeometry`, and a literal `X.y` placeholder) that
-    # their generator evidently filters and ours does not. Recorded rather than
-    # tuned away: an unexplained match would be worth less than an explained
-    # difference, and the audit prints DIFFERS for it.
+    # Landmarks are two different counts, checked against upstream's own
+    # generator (tools/docs-site/gen/graphdata.py). Ours: every distinct
+    # backticked name in PROOF-PATH.md (48) plus the definition files it names
+    # (4) = 52. Theirs: *theorems* named in PROOF-PATH.md or in docs/route.md and
+    # docs/overview.md, plus the goal = 49. The docs/ folder is not in the public
+    # tree. Their rule applied to the public files gives 35, which is exactly the
+    # theorem landmarks resolved here; the other 14 cannot be reproduced.
     "landmarks_upstream": 49,
-    "landmarks_ours": 52,
+    "landmark_names_ours": 52,
+    "theorem_landmarks_public": 35,
 }
 
 
@@ -92,11 +94,13 @@ def test_no_unfinished_proofs_anywhere(flt):
 
 
 def test_landmarks_resolve_and_are_load_bearing(flt):
-    assert len(flt.meta["landmarks"]) == UPSTREAM["landmarks_ours"]
+    assert len(flt.meta["landmarks"]) == UPSTREAM["landmark_names_ours"]
     by_title = {n.title: n.id for n in flt}
     closure = {"fermat_last_theorem"} | flt.ancestors("fermat_last_theorem", ("proof",))
     resolved = [by_title[name] for name in flt.meta["landmarks"] if name in by_title]
     assert len(resolved) >= 30, "most landmarks should name a node in the corpus"
+    theorem_marks = {r for r in resolved if flt.get(r).is_theorem} | {"fermat_last_theorem"}
+    assert len(theorem_marks) == UPSTREAM["theorem_landmarks_public"]
     # The claim that matters: every landmark the prose route names and that
     # resolves to a node is something the goal actually rests on.
     stranded = [r for r in resolved if r not in closure]
@@ -123,3 +127,13 @@ def test_every_node_declares_how_its_edges_were_derived(flt):
         if n.is_theorem:
             assert "not replayed by proofweb" in p["checked_by"]
             assert p["step_attribution"] == "textual"
+
+
+def test_citations_never_named_are_upstreams_plus_the_attribute_lines(flt):
+    """Upstream publishes 2,890, and replaying its generator's own rule on these
+    files gives exactly that. ProofWeb finds 29 more: each is named only on an
+    `attribute` or `open` line, which this importer does not count as proof
+    script. Two importer bugs once put this at 3,644; see FORMAL-TRACK §3a."""
+    never = {(n.id, dep) for n in flt if n.is_theorem
+             for dep in (n.provenance.get("lean") or {}).get("unused_imports") or ()}
+    assert len(never) == 2890 + 29

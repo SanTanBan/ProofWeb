@@ -204,7 +204,13 @@ def summarise(graph: Graph) -> str:
     if theorems:
         out.append(f"citations/step   {len(proof_edges) / max(steps, 1):.2f}")
     verified = sum(1 for n in graph if n.status == "verified")
-    reviewed = sum(1 for n in graph if n.status in ("reviewed", "verified"))
+    # On the hand-written track `verified` comes after two-person review, so it
+    # counts as reviewed. On an import it means a machine checked it somewhere
+    # else, and nobody here read it; counting it as reviewed would let 29,511
+    # imported theorems satisfy a criterion about human attention.
+    imported = bool((getattr(graph, "meta", None) or {}).get("derivation"))
+    reviewed = sum(1 for n in graph
+                   if n.status == "reviewed" or (n.status == "verified" and not imported))
     linked = sum(1 for n in graph if n.formalization)
     out.append(f"formalized       {linked}/{len(graph)} nodes link to a proof assistant")
 
@@ -223,12 +229,26 @@ def summarise(graph: Graph) -> str:
     layers = graph.layers(("proof",))
     out.append("")
     out.append("depth (longest chain back to an assumption):")
-    for depth, ids in layers.items():
+    items = list(layers.items())
+    # A machine-written corpus can be over a hundred layers deep; the ends of
+    # the chain are what a reader orients by, the middle is a count.
+    if len(items) > 12:
+        hidden = items[5:-5]
+        shown = [*items[:5], None, *items[-5:]]
+    else:
+        hidden, shown = [], items
+    for item in shown:
+        if item is None:
+            n = sum(len(ids) for _, ids in hidden)
+            out.append(f"  {'...':<14} {len(hidden)} more layers (depths "
+                       f"{hidden[0][0]}-{hidden[-1][0]}), {n} nodes")
+            continue
+        depth, ids = item
         label = "assumptions" if depth == 0 else f"depth {depth}"
-        out.append(f"  {label:<14} {', '.join(ids)}")
+        out.append(f"  {label:<14} {_few(list(ids))}")
 
     frontier = [n for n in graph.roots() if graph.get(n) and graph.get(n).is_theorem]
     if frontier:
         out.append("")
-        out.append("frontier (theorems nothing yet builds on): " + ", ".join(frontier))
+        out.append("frontier (theorems nothing yet builds on): " + _few(frontier))
     return "\n".join(out)
