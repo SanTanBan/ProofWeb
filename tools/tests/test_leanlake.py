@@ -193,3 +193,28 @@ def test_uncatalogued_challenges_are_still_recognised(lake_repo):
     holes = sect(audit(g), "Holes").data
     assert holes["challenge_sorry"] == ["Challenges.B", "Challenges.Support"]
     assert holes["sorry_modules"] == ["Demo.A.Lemmas"]
+
+
+def test_lakefile_toml_reader_works_without_tomllib(monkeypatch):
+    """Python 3.10 has no tomllib, and CI runs 3.10. The fallback must read the
+    library fields exactly as tomllib does."""
+    import builtins
+    from proofweb import leanlake
+    text = ('name = "AffineCore"\ndefaultTargets = ["AffineCore"]\n\n'
+            '[leanOptions]\nautoImplicit = false\n\n'
+            '[[require]]\nname = "mathlib"\nrev = "v4.32.0"\n\n'
+            '# vendored libraries\n[[lean_lib]]\nname = "Cm24"\nsrcDir = "vendor/a/b"\n\n'
+            '[[lean_lib]]\nname = "Solution"\nroots = ["Solution", "Extra.Part"]\n')
+    real_import = builtins.__import__
+
+    def no_tomllib(name, *args, **kwargs):
+        if name == "tomllib":
+            raise ImportError(name)
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", no_tomllib)
+    data = leanlake._load_lakefile_toml(text)
+    assert [lib["name"] for lib in data["lean_lib"]] == ["Cm24", "Solution"]
+    assert data["lean_lib"][0]["srcDir"] == "vendor/a/b"
+    assert data["lean_lib"][1]["roots"] == ["Solution", "Extra.Part"]
+    assert data["require"][0]["name"] == "mathlib"

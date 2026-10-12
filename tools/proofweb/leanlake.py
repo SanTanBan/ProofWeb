@@ -122,11 +122,7 @@ def library_specs(root: Path) -> list[tuple[str, str]]:
                      if r else [lib.group(1)])
             raw.extend((x, src) for x in roots)
     elif toml.exists():
-        import tomllib
-        try:
-            data = tomllib.loads(toml.read_text(encoding="utf-8"))
-        except (tomllib.TOMLDecodeError, UnicodeDecodeError):
-            data = {}
+        data = _load_lakefile_toml(toml.read_text(encoding="utf-8", errors="replace"))
         pkg_src = data.get("srcDir", ".")
         for lib in data.get("lean_lib", []) or []:
             if not isinstance(lib, dict) or "name" not in lib:
@@ -139,6 +135,48 @@ def library_specs(root: Path) -> list[tuple[str, str]]:
         if spec not in specs:
             specs.append(spec)
     return specs
+
+
+_TOML_TABLE = re.compile(r"^\s*(\[\[?)\s*([A-Za-z0-9_.\-]+)\s*\]\]?\s*(?:#.*)?$")
+_TOML_KEY = re.compile(r"^\s*([A-Za-z0-9_\-]+)\s*=\s*(.+?)\s*(?:#[^\"\]]*)?$")
+
+
+def _load_lakefile_toml(text: str) -> dict:
+    """The lakefile fields this importer needs, parsed with `tomllib` when the
+    Python has it (3.11+) and by a small reader otherwise. The reader handles
+    what lakefiles use for libraries: tables, arrays of tables, strings, and
+    arrays of strings. Anything it cannot read is skipped, never guessed."""
+    try:
+        import tomllib
+    except ImportError:
+        tomllib = None
+    if tomllib is not None:
+        try:
+            return tomllib.loads(text)
+        except tomllib.TOMLDecodeError:
+            return {}
+    data: dict = {}
+    current: dict = data
+    for line in text.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        t = _TOML_TABLE.match(line)
+        if t:
+            current = {}
+            if t.group(1) == "[[":
+                data.setdefault(t.group(2), []).append(current)
+            else:
+                data[t.group(2)] = current
+            continue
+        k = _TOML_KEY.match(line)
+        if not k:
+            continue
+        value = k.group(2)
+        if value.startswith('"') and value.endswith('"'):
+            current[k.group(1)] = value[1:-1]
+        elif value.startswith("[") and value.endswith("]"):
+            current[k.group(1)] = re.findall(r'"([^"]*)"', value)
+    return data
 
 
 def pathlib_posix(src: str) -> str:
