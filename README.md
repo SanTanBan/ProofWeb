@@ -280,7 +280,7 @@ the project.
 
 ## Explainer videos
 
-[ProofWeb-HumanVideoExplainers](https://github.com/SanTanBan/ProofWeb-HumanVideoExplainers)
+[ProofWeb-VideoExplainers](https://github.com/SanTanBan/ProofWeb-VideoExplainers)
 turns one result of a formal corpus into a narrated Manim explainer whose
 closing trust card is computed from this repository's audit rather than typed:
 which statements are formalized, what checked them, the axioms permitted,

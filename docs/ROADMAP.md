@@ -160,7 +160,7 @@ Added when the project pivoted to mechanistic extraction; see
       needs the term-level extraction below; no amount of text parsing gets
       there honestly.
 - [x] **Explainer videos with a computed trust card.** Done as a separate
-      repository, [ProofWeb-HumanVideoExplainers](https://github.com/SanTanBan/ProofWeb-HumanVideoExplainers):
+      repository, [ProofWeb-VideoExplainers](https://github.com/SanTanBan/ProofWeb-VideoExplainers):
       the lake audit's per-result facts become the card at the end of a
       narrated Manim video, and a lint holds the narration to the paper. First
       result: `openai/math` 012. What remains there is a person signing each
