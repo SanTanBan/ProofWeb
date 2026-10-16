@@ -278,6 +278,16 @@ inheritance entirely. Rocq extraction is a specification, not code.
 One maintainer, not a mathematician by training. That is the entire state of
 the project.
 
+## Explainer videos
+
+[ProofWeb-HumanVideoExplainers](https://github.com/SanTanBan/ProofWeb-HumanVideoExplainers)
+turns one result of a formal corpus into a narrated Manim explainer whose
+closing trust card is computed from this repository's audit rather than typed:
+which statements are formalized, what checked them, the axioms permitted,
+whether the proof's import closure contains a `sorry`, whether the manuscript
+was withdrawn. A lint holds the narration to the paper by file and line. The
+first explainer covers result 012 of `openai/math`, the joint Dickman law.
+
 ## Citing
 
 Code is MIT; graph content and extracted datasets are CC BY 4.0 — use anything

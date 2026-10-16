@@ -159,6 +159,12 @@ Added when the project pivoted to mechanistic extraction; see
       bound. Getting from "file A may use file B" to "theorem X uses theorem Y"
       needs the term-level extraction below; no amount of text parsing gets
       there honestly.
+- [x] **Explainer videos with a computed trust card.** Done as a separate
+      repository, [ProofWeb-HumanVideoExplainers](https://github.com/SanTanBan/ProofWeb-HumanVideoExplainers):
+      the lake audit's per-result facts become the card at the end of a
+      narrated Manim video, and a lint holds the narration to the paper. First
+      result: `openai/math` 012. What remains there is a person signing each
+      narration, which no tool can do.
 - [ ] **`leandojo-to-proofweb` converter.** LeanDojo already extracts
       tactic-level premises from mathlib; converting its traced format into
       this repository's extracted-JSON puts `uses`/`why`/the viewer over
